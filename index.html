@@ -11,7 +11,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-.wrap{max-width:960px;margin:0 auto;padding:16px}
+.wrap{max-width:100%;margin:0 auto;padding:12px 10px}
 h1{font-size:20px;margin:4px 0 2px}
 .sub{color:var(--mu);margin:0 0 14px;font-size:13px}
 .tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px}
@@ -384,15 +384,16 @@ function initCloud(){
   sync();
 }
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+const isP=i=>!!(i.proses||i.reg);
 function render(){
   const q=$('cari').value.trim().toLowerCase();
-  const nP=items.filter(i=>i.proses).length;
+  const nP=items.filter(isP).length;
   $('sbd').textContent='Daftar ('+(items.length-nP)+')';$('sbp').textContent='Proses ('+nP+')';
   $('sbd').classList.toggle('on',sbMode==='d');$('sbp').classList.toggle('on',sbMode==='p');
-  const list=items.filter(i=>!!i.proses===(sbMode==='p')&&[i.nama,i.jenis,i.njenis,i.abv,i.kemasan,i.prin,i.aprin,i.pab,i.apab,i.pic].join(' ').toLowerCase().includes(q));
+  const list=items.filter(i=>isP(i)===(sbMode==='p')&&[i.nama,i.jenis,i.njenis,i.abv,i.kemasan,i.prin,i.aprin,i.pab,i.apab,i.pic].join(' ').toLowerCase().includes(q));
   $('cnt').textContent=list.length+' barang'+(sbMode==='p'?' dalam proses':'');
   const sub=v=>v?'<div class="fnm">'+esc(v)+'</div>':'';
-  $('tb').innerHTML=list.length?list.map((i,n)=>'<tr><td>'+(n+1)+'</td><td>'+esc(i.nama)+sub(i.jenis)+sub(i.njenis)+'</td><td>'+(i.abv?esc(i.abv)+'%':'-')+sub(i.kemasan)+'</td><td>'+esc(i.prin||'-')+sub(i.aprin)+'</td><td>'+esc(i.pab||'-')+sub(i.apab)+'</td><td>'+esc(i.pic||'-')+'</td><td class="a"><button data-e="'+i.id+'">Ubah</button> '+(i.proses?'<button data-k="'+i.id+'">Kembalikan</button> ':'')+'<button class="d" data-d="'+i.id+'">Hapus</button></td></tr>').join(''):'<tr><td colspan="7" class="empty">'+(sbMode==='p'?'Belum ada produk yang sedang diproses NIE-nya.':'Belum ada data.')+'</td></tr>';
+  $('tb').innerHTML=list.length?list.map((i,n)=>'<tr><td>'+(n+1)+'</td><td>'+esc(i.nama)+sub(i.jenis)+sub(i.njenis)+'</td><td>'+(i.abv?esc(i.abv)+'%':'-')+sub(i.kemasan)+'</td><td>'+esc(i.prin||'-')+sub(i.aprin)+'</td><td>'+esc(i.pab||'-')+sub(i.apab)+'</td><td>'+esc(i.pic||'-')+'</td><td class="a"><button data-e="'+i.id+'">Ubah</button> '+(isP(i)?'<button data-k="'+i.id+'">Kembalikan</button> ':'')+'<button class="d" data-d="'+i.id+'">Hapus</button></td></tr>').join(''):'<tr><td colspan="7" class="empty">'+(sbMode==='p'?'Belum ada produk yang sedang diproses NIE-nya.':'Belum ada data.')+'</td></tr>';
 }
 let sbMode='d';
 const MF=['nama','jenis','njenis','abv','kemasan','prin','aprin','pab','apab','pic'];
@@ -418,7 +419,7 @@ $('cari').oninput=render;
 document.querySelector('.subtabs').onclick=e=>{const m=e.target.dataset.sb;if(m){sbMode=m;render()}};
 $('tb').onclick=e=>{
   const ed=e.target.dataset.e,dl=e.target.dataset.d,kb=e.target.dataset.k;
-  if(kb){const it=items.find(i=>i.id===kb);if(it){delete it.proses;save();render()}}
+  if(kb){const it=items.find(i=>i.id===kb);if(it){if(it.nie){alert('Barang ini sudah punya NIE tersimpan (bar 6) dan tidak bisa dikembalikan.');return}if(it.reg&&!confirm('Barang sudah masuk Proses Pendaftaran. Kembalikan ke Daftar? Data revisi dan isian NIE yang belum disimpan akan dihapus.'))return;delete it.proses;delete it.reg;save();render()}}
   if(ed){const it=items.find(i=>i.id===ed);if(it)openM(it)}
   if(dl){const it=items.find(i=>i.id===dl);if(it&&confirm('Hapus \u201c'+it.nama+'\u201d?')){items=items.filter(i=>i.id!==dl);save();render()}}
 };
@@ -442,13 +443,18 @@ function docsOf(it){
   return it.docs;
 }
 function pct(it){const d=docsOf(it);return d.length?Math.round(d.reduce((a,x)=>a+x.s,0)/(d.length*2)*100):0}
+function itTitle(i){
+  const ab=i.abv&&+i.abv>0?'(Mengandung Alkohol +/- '+i.abv+'% v/v)':'';
+  const head=[[i.jenis,i.njenis].filter(Boolean).join(' - '),ab].filter(Boolean).join(' ');
+  return head+(i.nama?(head?' - ':'')+i.nama:'');
+}
 function render2(){
   const L=$('dlist'),B=$('dbody');
   const it=items.find(i=>i.id===selId);
   if(!it){
     selId=null;B.style.display='none';L.style.display='';
     if(!items.length){L.innerHTML='<div class="card empty">Tambahkan barang di tahap 1 terlebih dahulu.</div>';return}
-    L.innerHTML='<div class="card"><div class="cnt" style="margin-bottom:8px">Klik nama barang untuk melihat kelengkapan dokumennya.</div>'+items.map(i=>{const d=docsOf(i),n=d.filter(x=>x.s>0).length,p=pct(i);return '<div class="bi" data-b="'+i.id+'"><div class="bn"><b>'+esc(i.nama)+'</b><div class="meta">'+esc(i.prin||'-')+' \u00b7 '+n+' dari '+d.length+' dokumen ada</div></div><div class="bp"><div class="bar"><i style="width:'+p+'%"></i></div><span class="cnt">'+p+'%</span></div></div>'}).join('')+'</div>';
+    L.innerHTML='<div class="card"><div class="cnt" style="margin-bottom:8px">Klik nama barang untuk melihat kelengkapan dokumennya.</div>'+items.map(i=>{const d=docsOf(i),n=d.filter(x=>x.s>0).length,p=pct(i);return '<div class="bi" data-b="'+i.id+'"><div class="bn"><b>'+esc(itTitle(i))+'</b>'+(i.kemasan?'<div class="fnm">'+esc(i.kemasan)+'</div>':'')+'<div class="meta">'+esc(i.prin||'-')+' \u00b7 '+n+' dari '+d.length+' dokumen ada</div></div><div class="bp"><div class="bar"><i style="width:'+p+'%"></i></div><span class="cnt">'+p+'%</span></div></div>'}).join('')+'</div>';
     return;
   }
   L.style.display='none';B.style.display='';
@@ -459,7 +465,7 @@ function render2(){
     +'<td><input type="date" data-tb="'+x.id+'" value="'+esc(x.tb||'')+'"></td>'
     +'<td class="fc"><div class="lkb"><input type="text" data-lk="'+x.id+'" placeholder="Tempel link folder\u2026" value="'+esc(x.lk||'')+'">'+(x.lk?'<a href="'+esc(x.lk)+'" target="_blank" rel="noopener">Buka</a>':'')+'</div>'+(x.fd?'<div style="margin-top:4px"><a href="#" data-v="'+x.id+'">View file lama</a> <button class="d" data-rf="'+x.id+'" title="Hapus file lama">hapus file</button></div>':'')+' <button class="d" data-x="'+x.id+'" title="Hapus dokumen">\u2715</button></td></tr>';
   B.innerHTML='<div class="row" style="margin-top:0;margin-bottom:12px"><button id="back">\u2190 Kembali ke daftar</button></div>'
-  +'<div class="card"><b>'+esc(it.nama)+'</b><div class="meta">Principal: '+esc(it.prin||'-')+' \u00b7 Personal: '+esc(it.pic||'-')+'</div><div class="bar"><i style="width:'+p+'%"></i></div><div class="cnt">'+p+'% lengkap \u00b7 '+ada+' dokumen sudah ada \u00b7 '+(d.length-ada)+' belum ada</div></div>'
+  +'<div class="card"><b>'+esc(itTitle(it))+'</b>'+(it.kemasan?'<div class="fnm">'+esc(it.kemasan)+'</div>':'')+'<div class="meta">Principal: '+esc(it.prin||'-')+' \u00b7 Personal: '+esc(it.pic||'-')+'</div><div class="bar"><i style="width:'+p+'%"></i></div><div class="cnt">'+p+'% lengkap \u00b7 '+ada+' dokumen sudah ada \u00b7 '+(d.length-ada)+' belum ada</div></div>'
   +'<div class="card"><div class="tw"><table id="t2"><thead><tr><th>Uraian</th><th>Status</th><th>Tanggal Terbit</th><th>Tanggal Berakhir</th><th>File</th></tr></thead><tbody>'+d.map(row).join('')+'</tbody></table></div></div>'
   +'<div class="card"><div class="row" style="margin-top:0"><input id="nd" placeholder="Tambah dokumen lain\u2026" style="max-width:320px"><button id="ad">Tambah</button></div></div>'
   +gone(it);
@@ -579,11 +585,16 @@ function parseSpb(raw){
 function loadScript(u){return new Promise((res,rej)=>{if(document.querySelector('script[src="'+u+'"]'))return res();const e=document.createElement('script');e.src=u;e.onload=res;e.onerror=rej;document.head.appendChild(e)})}
 const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',PDFW='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',TESS='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
 async function ocr(src){await loadScript(TESS);const r=await Tesseract.recognize(src,'eng');return r.data.text||''}
+function rowText(items){
+  const a=items.filter(x=>x.str&&x.str.trim()).map(x=>({s:x.str,x:x.transform[4],y:x.transform[5]})).sort((p,q)=>q.y-p.y||p.x-q.x),rows=[];
+  a.forEach(w=>{const r=rows.find(r=>Math.abs(r.y-w.y)<=2.5);if(r)r.w.push(w);else rows.push({y:w.y,w:[w]})});
+  return rows.sort((p,q)=>q.y-p.y).map(r=>r.w.sort((p,q)=>p.x-q.x).map(w=>w.s.trim()).join(' ')).join(' \n ');
+}
 async function readNieText(f){
   if(f.type==='application/pdf'||/\.pdf$/i.test(f.name)){
     await loadScript(PDFJS);pdfjsLib.GlobalWorkerOptions.workerSrc=PDFW;
     const doc=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;
-    let t='';for(let n=1;n<=Math.min(doc.numPages,5);n++){const pg=await doc.getPage(n),c=await pg.getTextContent();t+=' '+c.items.map(x=>x.str).join(' ')}
+    let t='';for(let n=1;n<=Math.min(doc.numPages,5);n++){const pg=await doc.getPage(n),c=await pg.getTextContent();t+=' '+rowText(c.items)}
     if(t.replace(/\s/g,'').length>=20)return t;
     const pg=await doc.getPage(1),vp=pg.getViewport({scale:2.2}),cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;
     await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
@@ -592,6 +603,57 @@ async function readNieText(f){
   return await ocr(f);
 }
 function openDU(du,fn){const w=window.open('','_blank');getBlob(du).then(b=>{const u=URL.createObjectURL(b);if(w){w.location=u}else{const a=document.createElement('a');a.href=u;a.download=fn||'file';document.body.appendChild(a);a.click();a.remove()}}).catch(()=>{if(w)w.close();alert('Gagal membuka file. Periksa koneksi internet.')})}
+function parseNieLabel(raw){
+  const t=String(raw||'').replace(/\s+/g,' ');
+  const g=(re)=>{const m=t.match(re);return m?m[1].trim():''};
+  const o={nm:'',sn:'',ib:'',nb:'',dp:'',di:''};
+  o.nm=g(/Nama\s*Dagang\s*:\s*(.+?)\s+(?:3\.\s*)?Jenis\s*Kemasan/i);
+  const jn=g(/Nama\s*Jenis\s*Pangan\s*:\s*(.+?)\s+(?:2\.\s*)?Nama\s*Dagang/i);
+  o.sn=jn.replace(/\s*\(.*$/,'').trim();
+  const km=g(/Jenis\s*Kemasan[^:]*:\s*(.+?)\s+(?:4\.\s*)?(?:a\.\s*)?Nama\s*Produsen/i);
+  const kk=km.match(/\(\s*([^)]*?)\s*\)/);
+  o.ib=kk?kk[1].trim():'';
+  o.nb=g(/BPOM\s*RI\s*M[DL]\s*(\d{9,15})/i);
+  const pn=g(/Nama\s*Produsen\s*:\s*(.+?)\s+(?:b\.\s*)?Alamat\s*Produsen/i);
+  const pa=g(/Alamat\s*Produsen\s*:\s*(.+?)\s+(?:c\.\s*)?Nama\s*Importir/i);
+  o.dp=[pn,pa].filter(Boolean).join(' ');
+  o.di=g(/Nama\s*Importir\s*\/?\s*Distributor\s*:\s*(.+?)\s+(?:d\.\s*)?Alamat\s*Importir/i);
+  return o;
+}
+function parseKomposisi(raw){
+  const t=String(raw||'').replace(/\s+/g,' ');
+  const m=t.match(/Kompos\w*\s*[:=;]\s*(.+?)\s*(?:[|\\'‘’\[\]]\s*)?BPOM\s*RI|Kompos\w*\s*[:=;]\s*(.+?)\s*(?:Diproduksi|Diimpor)/i);
+  const v=m?(m[1]||m[2]||''):'';
+  return v.replace(/\s+[|\\'‘’\[\]!]+\s*/g,' ').replace(/^[|\\'‘’\[\]!\s]+|[|\\'‘’\[\]!\s]+$/g,'').trim();
+}
+
+async function bigJpeg(f){
+  const u8=new Uint8Array(await f.arrayBuffer()),s=new TextDecoder('iso-8859-1').decode(u8);
+  let best=null,re=/stream\r?\n/g,m;
+  while((m=re.exec(s))){
+    const st=m.index+m[0].length;
+    if(u8[st]!==0xFF||u8[st+1]!==0xD8)continue;
+    const en=s.indexOf('endstream',st);if(en<0)continue;
+    const len=en-st;if(!best||len>best.len)best={st:st,len:len};
+  }
+  return best?new Blob([u8.slice(best.st,best.st+best.len)],{type:'image/jpeg'}):null;
+}
+async function nieLabelFromPdf(f,tx){
+  const o=parseNieLabel(tx);
+  if(!(o.nm||o.nb))return o;
+  try{
+    await loadScript(PDFJS);pdfjsLib.GlobalWorkerOptions.workerSrc=PDFW;
+    const doc=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;
+    const pg=await doc.getPage(1),vp=pg.getViewport({scale:3}),cv=document.createElement('canvas');
+    cv.width=Math.round(vp.width);cv.height=Math.round(vp.height);
+    await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+    const x0=Math.round(cv.width*.763),y0=Math.round(cv.height*.176),w=Math.round(cv.width*.106),h=Math.round(cv.height*.0685);
+    const q=document.createElement('canvas');q.width=w;q.height=h;q.getContext('2d').drawImage(cv,x0,y0,w,h,0,0,w,h);
+    o.qr=q.toDataURL('image/png');
+  }catch(e){}
+  try{const jb=await bigJpeg(f);if(jb)o.kp=parseKomposisi(await ocr(jb))}catch(e){}
+  return o;
+}
 const nMsg={};
 function dr(it){it.reg=it.reg||{};return it.reg.d=it.reg.d||{}}
 $('l5').onclick=e=>{
@@ -603,7 +665,7 @@ $('l5').onclick=e=>{
     const it=items.find(i=>i.id===d.ns);if(!it)return;const x=dr(it);
     if(!x.no||!x.exp||!x.fd){alert('Lengkapi dulu: nomor NIE, masa berlaku, dan file NIE.');return}
     if(!confirm('Simpan NIE \u201c'+it.nama+'\u201d dan pindahkan ke Label BPOM?'))return;
-    it.nie={no:x.no,exp:x.exp,fn:x.fn,fd:x.fd,tgl:new Date().toISOString()};delete it.reg.d;save();render4();return}
+    it.nie={no:x.no,exp:x.exp,fn:x.fn,fd:x.fd,lab:x.lab||undefined,tgl:new Date().toISOString()};delete it.reg.d;save();render4();return}
   const id=d.rv||d.rm||d.rl;if(!id)return;e.preventDefault();
   const it=items.find(i=>i.id===id);if(!it)return;
   if(d.rv){revOpen=revOpen===id?null:id;render4();return}
@@ -613,6 +675,7 @@ $('l5').onclick=e=>{
 };
 $('l5').onchange=e=>{
   const t=e.target,d=t.dataset;
+  if(d.lf){const q=d.lf.split(':'),it0=items.find(i=>i.id===q[1]);if(it0){const x0=dr(it0);x0.lab=x0.lab||{};x0.lab[q[0]]=t.value.trim();save()}return}
   const id=d.nn||d.nx||d.nf;if(!id)return;
   const it=items.find(i=>i.id===id);if(!it)return;const x=dr(it);
   if(d.nn){x.no=t.value.trim();save();return}
@@ -631,15 +694,30 @@ $('l5').onchange=e=>{
       if(o.exp){x.exp=o.exp;got.push('masa berlaku')}
       nMsg[id]=got.length?'Terisi otomatis: '+got.join(' & ')+'. Periksa kembali sebelum Simpan.':'Tidak berhasil membaca nomor/tanggal dari file. Isi manual.';
       save();render4();
+      if(!isP)return;
+      nMsg[id]+=' Membaca data label dari NIE (OCR, bisa sampai 1 menit)\u2026';render4();
+      return nieLabelFromPdf(f,tx).then(lb=>{
+        x.lab=lb;const n=['nm','sn','ib','nb','dp','di','kp','qr'].filter(k=>lb[k]).length;
+        nMsg[id]=nMsg[id].replace(/ Membaca data label.*$/,'')+(n?' Data label terbaca ('+n+'/8). Periksa isian di bawah.':' Data label tidak terbaca, isi manual jika perlu.');
+        save();render4();
+      });
     }).catch(()=>{nMsg[id]='Gagal membaca file otomatis (perlu internet). Isi manual.';render4()});
   };r.readAsDataURL(f);
 };
+function labFields(i,x){
+  const lb=x.lab;if(!lb)return '';
+  const f=(k,l,ta)=>'<label class="cnt" style="margin:0;flex:1 1 230px">'+l+(ta?'<textarea rows="3" data-lf="'+k+':'+i.id+'">'+esc(lb[k]||'')+'</textarea>':'<input data-lf="'+k+':'+i.id+'" value="'+esc(lb[k]||'')+'">')+'</label>';
+  return '<div class="row" style="margin:10px 0 0;gap:8px;flex-wrap:wrap;align-items:flex-start"><div class="cnt" style="width:100%"><b>Data Label dari NIE</b> (terbaca otomatis, bisa diedit; dipakai di bar 6)</div>'
+   +(lb.qr?'<img src="'+lb.qr+'" alt="QR" style="height:70px;border:1px solid var(--bd);border-radius:6px;background:#fff">':'')
+   +f('nm','Nama Dagang')+f('sn','Nama Jenis Pangan')+f('ib','Isi Bersih')+f('nb','Nomor BPOM RI ML')
+   +f('kp','Komposisi',1)+f('dp','Diproduksi Oleh',1)+f('di','Diimpor Oleh',1)+'</div>';
+}
 function render4(){
   const l=items.filter(i=>i.reg&&!i.nie);
   $('c5').textContent=l.length+' barang';
   $('l5').innerHTML=l.length?'<div class="tw"><table><thead><tr><th>Nomor Pengajuan</th><th>Billing ID</th><th>Produk</th><th>Produsen</th><th>SPB</th><th>Kelengkapan</th></tr></thead><tbody>'+l.map(i=>{
     const x=(i.reg&&i.reg.d)||{};
-    const sub='<tr class="dt"><td colspan="6"><div class="row" style="margin:0;gap:8px;align-items:center;flex-wrap:wrap"><label class="cnt" style="margin:0">Nomor NIE <input data-nn="'+i.id+'" value="'+esc(x.no||'')+'" placeholder="mis. ML 536021012345" style="min-width:190px"></label><label class="cnt" style="margin:0">Masa berlaku <input type="date" data-nx="'+i.id+'" value="'+esc(x.exp||'')+'"></label><label class="fl">'+(x.fd?'Ganti NIE':'Unggah NIE')+'<input type="file" accept="application/pdf,image/*" data-nf="'+i.id+'" hidden></label>'+(x.fd?'<a href="#" data-nv="'+i.id+'">'+esc(x.fn||'NIE')+'</a><button class="d" data-nd="'+i.id+'">hapus</button>':'')+'<button class="p" data-ns="'+i.id+'">Simpan</button>'+(nMsg[i.id]?'<span class="cnt">'+esc(nMsg[i.id])+'</span>':'')+'</div></td></tr>';
+    const sub='<tr class="dt"><td colspan="6"><div class="row" style="margin:0;gap:8px;align-items:center;flex-wrap:wrap"><label class="cnt" style="margin:0">Nomor NIE <input data-nn="'+i.id+'" value="'+esc(x.no||'')+'" placeholder="mis. ML 536021012345" style="min-width:190px"></label><label class="cnt" style="margin:0">Masa berlaku <input type="date" data-nx="'+i.id+'" value="'+esc(x.exp||'')+'"></label><label class="fl">'+(x.fd?'Ganti NIE':'Unggah NIE')+'<input type="file" accept="application/pdf,image/*" data-nf="'+i.id+'" hidden></label>'+(x.fd?'<a href="#" data-nv="'+i.id+'">'+esc(x.fn||'NIE')+'</a><button class="d" data-nd="'+i.id+'">hapus</button>':'')+'<button class="p" data-ns="'+i.id+'">Simpan</button>'+(nMsg[i.id]?'<span class="cnt">'+esc(nMsg[i.id])+'</span>':'')+'</div>'+labFields(i,x)+'</td></tr>';
     const rev=' &nbsp;<a href="#" data-rv="'+i.id+'">Revisi rancangan</a>'+(revOpen===i.id?' <button data-rm="'+i.id+'">Rancangan ML BPOM</button> <button data-rl="'+i.id+'">Rancangan Label</button>':'');
     const spb=i.spb&&i.spb.fd?'<div><a href="#" data-vs="'+i.id+'">'+esc(i.spb.fn||'SPB.pdf')+'</a></div>':'';
     return bRow(i,{rev:rev,spb:spb,sub:sub})}).join('')+'</tbody></table></div>':'<div class="empty">Belum ada barang di Proses Pendaftaran.</div>';
@@ -647,9 +725,9 @@ function render4(){
 function render5(){
   const l=items.filter(i=>i.nie);
   $('c6').textContent=l.length+' barang';
-  $('l6').innerHTML=l.length?l.map(i=>'<div class="bi" style="cursor:default"><div class="bn"><b><a href="#" data-n6="'+i.id+'">'+esc(i.nama)+'</a></b> &nbsp;<a href="#" data-l6="'+i.id+'">Label</a><div class="meta">NIE '+esc(i.nie.no)+' \u00b7 berlaku s.d. '+esc(i.nie.exp)+'</div></div></div>').join(''):'<div class="empty">Belum ada barang dengan NIE tersimpan.</div>';
+  $('l6').innerHTML=l.length?l.map(i=>'<div class="bi" style="cursor:default"><div class="bn"><b><a href="#" data-n6="'+i.id+'">'+esc(itTitle(i))+'</a></b> &nbsp;<a href="#" data-l6="'+i.id+'">Label</a>'+(i.kemasan?'<div class="fnm">'+esc(i.kemasan)+'</div>':'')+'<div class="meta"><a href="#" data-n6="'+i.id+'">NIE '+esc(i.nie.no)+'</a> \u00b7 berlaku s.d. '+fmtD(i.nie.exp)+'</div></div></div>').join(''):'<div class="empty">Belum ada barang dengan NIE tersimpan.</div>';
 }
-function mlOfReg(it){const pick=a=>a&&a.find(z=>z.n===RML),x=pick(it.rev&&it.rev.docs)||pick(docsOf(it));return Object.assign(mlDef(it),(x&&x.ml)||{})}
+function mlOfReg(it){const pick=a=>a&&a.find(z=>z.n===RML),x=pick(it.rev&&it.rev.docs)||pick(docsOf(it));const m=Object.assign(mlDef(it),(x&&x.ml)||{}),L=(it.nie&&it.nie.lab)||{};['nm','sn','ib','nb','dp','di','kp'].forEach(k=>{if(L[k])m[k]=L[k]});return m}
 function closeM5(){$('mo5').style.display='none';$('m5_b').innerHTML=''}
 $('m5_close').onclick=closeM5;
 $('mo5').onclick=e=>{if(e.target.id==='mo5')closeM5()};
@@ -660,7 +738,7 @@ $('l6').onclick=e=>{
   const B=$('m5_b');
   if(d.l6){
     $('m5_t').textContent='Rancangan ML BPOM \u2014 '+it.nama;
-    B.innerHTML='<div style="max-width:400px;margin:0 auto">'+mlHTML(mlOfReg(it),false)+'</div>';
+    B.innerHTML='<div style="max-width:400px;margin:0 auto">'+mlHTML(mlOfReg(it),false,(it.nie.lab||{}).qr)+'</div>';
     $('mo5').style.display='flex';return;
   }
   const n=it.nie;
@@ -796,12 +874,12 @@ function mlDef(it){
   const km=String(it.kemasan||'').match(/(\d+(?:[.,]\d+)?)\s*(ml|cl|liter|l)\b/i);
   return {jd:'MINUMAN BERALKOHOL',nm:it.nama||'',sn:it.njenis||'',ib:km?km[1]+' '+km[2].toLowerCase().replace('liter','l'):'',alk:it.abv||'',nb:'',kt:'Lihat Kemasan',bg:'Lihat pada kemasan',kp:'',dp:[pd.n,pd.a].filter(Boolean).join(' '),di:'',pr:'"DIBAWAH UMUR 21 TAHUN ATAU WANITA HAMIL DILARANG MINUM"'};
 }
-function mlHTML(m,ed){
+function mlHTML(m,ed,qr){
   const L=(a,b)=>'<div class="mlr"><b>'+a+' :</b> '+esc(b)+'</div>';
   const mv=ed&&!LOGO.lock;
   const g=LOGO.src?'<div class="mlg'+(mv?' dr ed" data-g="1':'')+'" style="left:'+LOGO.l+'%;top:'+LOGO.t+'%;width:'+LOGO.w+'%"><img src="'+LOGO.src+'" alt="" draggable="false" style="opacity:'+LOGO.o+'">'+(mv?'<i class="rz"></i>':'')+'</div>':'';
   return '<div class="mlw"><div class="ml">'+g
-   +'<div class="mlt"><div class="mlq"><span style="visibility:hidden">BPOMRI</span><div class="mlb">MGP<br>Barcode</div></div><div class="mlh">'+esc(m.jd)+'</div><div class="mlq">BPOMRI<div class="mlb">2D<br>Barcode</div></div></div>'
+   +'<div class="mlt"><div class="mlq"><span style="visibility:hidden">BPOMRI</span><div class="mlb">MGP<br>Barcode</div></div><div class="mlh">'+esc(m.jd)+'</div><div class="mlq">BPOMRI'+(qr?'<div class="mlb" style="border:0;padding:0"><img src="'+qr+'" alt="" style="width:100%;height:100%;object-fit:contain"></div>':'<div class="mlb">2D<br>Barcode</div>')+'</div></div>'
    +'<div class="mln"><div>'+esc(m.nm)+'</div><div>'+esc(m.sn)+'</div></div>'
    +L('Isi Bersih',m.ib)
    +'<div class="mlr">Mengandung  Alkohol \u00b1'+esc(String(m.alk).replace(',','.'))+'% v/v</div>'
