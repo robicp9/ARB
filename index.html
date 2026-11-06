@@ -69,6 +69,7 @@ tr[data-r]{cursor:pointer}
 .un{font-size:14px}
 .fnm{font-size:12px;color:var(--mu);word-break:break-all}
 .fc{white-space:nowrap}
+a,a:visited{color:var(--ac)}
 .fc a,.fl{color:var(--ac);cursor:pointer;font-size:13px;text-decoration:underline;margin-right:6px}
 .fc button.d{border:0;background:none;padding:2px 4px;font-size:12px}
 #t3{min-width:620px}
@@ -127,6 +128,9 @@ textarea:focus{outline:2px solid var(--ac)}
 .cp2 button.on{opacity:1;border-color:var(--bd);border-radius:6px;background:var(--card)}
 .lkb{display:flex;gap:6px;align-items:center}
 .lkb input{min-width:190px}
+.tp>td{vertical-align:top}
+.rti{position:relative;margin-top:0}.rti .rtb{position:absolute;right:0;top:-20px;margin:0}.rti .rtb button{padding:0 8px;min-width:26px;font-size:12px;line-height:18px}.rti .rte{min-height:80px}
+.rt{margin-top:4px}.rtb{display:flex;gap:4px;margin-bottom:4px}.rtb button{padding:2px 10px;min-width:30px}.rte{border:1px solid var(--bd);border-radius:8px;padding:8px 10px;min-height:64px;max-height:180px;overflow:auto;outline:none;line-height:1.4;color:inherit;white-space:pre-wrap}.rte:focus{border-color:#3ec9a0}
 </style>
 </head>
 <body>
@@ -140,19 +144,20 @@ textarea:focus{outline:2px solid var(--ac)}
     <div class="tab" data-t="4">4. Proses SPB</div>
     <div class="tab" data-t="5">5. Proses Pendaftaran</div>
     <div class="tab" data-t="6">6. Label BPOM</div>
+    <div class="tab" data-t="7">7. Data Perusahaan</div>
   </div>
   <div id="v1">
   <div class="subtabs"><div class="tab on" data-sb="d" id="sbd">Daftar</div><div class="tab" data-sb="p" id="sbp">Proses</div></div>
   <div class="card">
     <div class="row" style="margin-top:0">
       <input id="cari" placeholder="Cari barang, principal, pabrik, atau PIC…" style="max-width:320px">
-      <button class="p" id="tambah">+ Tambah Barang</button>
+      <button class="p" id="tambah">+ Tambah Principal</button>
       <span class="cnt" id="cnt"></span>
       <span class="sp"></span>
     </div>
     <div class="tw" style="margin-top:10px">
       <table>
-        <thead><tr><th>#</th><th>Nama Barang</th><th>ABV%</th><th>Principal</th><th>Pabrik</th><th>PIC</th><th></th></tr></thead>
+        <thead><tr><th>#</th><th>Principal</th><th>Pabrik</th><th>Nama Barang</th><th>ABV%</th><th></th></tr></thead>
         <tbody id="tb"></tbody>
       </table>
     </div>
@@ -165,10 +170,11 @@ textarea:focus{outline:2px solid var(--ac)}
   </div>
 
   <div id="v3" style="display:none">
+    <div class="subtabs" id="sb3"><div class="tab on" data-p3="d" id="p3d">Daftar</div><div class="tab" data-p3="p" id="p3p">Proses</div><div class="tab" data-p3="a" id="p3a">Disetujui</div></div>
     <div class="card">
       <div class="row" style="margin-top:0"><b>Proses Pabrik</b><span class="cnt" id="pcnt"></span><span class="sp"></span><select id="pflt" style="width:auto"><option value="">Semua</option><option>Siap</option><option>Belum</option></select></div>
-      <div class="cnt" style="margin-top:6px">Siap = minimal satu barang principal tersebut sudah Lengkap di LOA, CFS, dan NKV / HACCP / ISO. Kolom dokumen menampilkan nama dan alamat yang diisi di Kelengkapan Dokumen.</div>
-      <div class="tw" style="margin-top:10px"><table id="tp"><thead><tr><th>Principal</th><th>Barang</th><th>LOA</th><th>LOE</th><th>CFS</th><th>NKV / HACCP / ISO</th><th>Status</th><th>Action</th></tr></thead><tbody id="tbp"></tbody></table></div>
+      <div class="cnt" style="margin-top:6px">Satu baris = satu pabrik (nama + alamat dari bar 1; yang sama digabung jadi satu). Siap = minimal satu barang dari pabrik tersebut sudah Lengkap di LOA, CFS, dan NKV / HACCP / ISO. Kolom dokumen menampilkan nama dan alamat yang diisi di Kelengkapan Dokumen.</div>
+      <div class="tw" style="margin-top:10px"><table id="tp"><thead><tr><th>Pabrik</th><th>Barang</th><th>LOA</th><th>LOE</th><th>CFS</th><th>NKV / HACCP / ISO</th><th>Status</th><th>Action</th></tr></thead><tbody id="tbp"></tbody></table></div>
     </div>
   </div>
 
@@ -182,6 +188,10 @@ textarea:focus{outline:2px solid var(--ac)}
 
   <div id="v6" style="display:none">
     <div class="card"><div class="row" style="margin-top:0"><b>Label BPOM</b><span class="cnt" id="c6"></span></div><div id="l6" style="margin-top:8px"></div></div>
+  </div>
+
+  <div id="v7" style="display:none">
+    <div class="card"><b>Data Perusahaan</b><div class="cnt" style="margin-top:4px">Barcode PT dipakai di Label BPOM (bar 6), pada kotak barcode sebelah kiri label.</div><div id="l7" style="margin-top:12px"></div></div>
   </div>
 </div>
 
@@ -201,6 +211,18 @@ textarea:focus{outline:2px solid var(--ac)}
   </div>
   <datalist id="dl_abv"></datalist><datalist id="dl_jenis"></datalist><datalist id="dl_njenis"></datalist><datalist id="dl_kem"></datalist><datalist id="dl_prin"></datalist><datalist id="dl_pab"></datalist><datalist id="dl_pic"></datalist>
   <div class="row"><button class="p" id="simpan">Simpan</button><button id="batal">Batal</button></div>
+</div></div>
+
+<div id="mo7" class="mo" style="display:none"><div class="md wide" role="dialog" aria-modal="true" aria-labelledby="p7t">
+  <h2 id="p7t">Tambah Principal</h2>
+  <div class="mg">
+    <div><label for="p7p">Principal</label><input id="p7p" list="dl_prin" placeholder="mis. PT Contoh Farma"></div>
+    <div><label for="p7a">Alamat Principal</label><textarea id="p7a" rows="2"></textarea></div>
+    <div><label for="p7c">PIC</label><input id="p7c" list="dl_pic" placeholder="mis. Budi"></div>
+  </div>
+  <div class="row"><b>Barang</b><span class="sp"></span><button class="p" id="p7add">+ Tambah barang</button></div>
+  <div id="p7b"></div>
+  <div class="row"><button class="p" id="p7s">Simpan</button><button id="p7x">Batal</button></div>
 </div></div>
 
 <div id="mo2" class="mo" style="display:none"><div class="md" role="dialog" aria-modal="true" aria-labelledby="e_title">
@@ -305,7 +327,7 @@ async function pull(){
   if(m.items!==undefined&&!d.includes('items')){items=Array.isArray(m.items)?m.items:[];try{localStorage.setItem(KEY,JSON.stringify(items))}catch(e){}}
   else if(items.length||d.includes('items')){await push('items')}
   if(m.logo!==undefined&&!d.includes('logo')){LOGO={src:'',l:25,t:25,w:50,o:.35,lock:false};Object.assign(LOGO,m.logo);try{localStorage.setItem(LK,JSON.stringify(LOGO))}catch(e){}}
-  else if(LOGO.src||d.includes('logo')){await push('logo')}
+  else if(LOGO.src||LOGO.co||d.includes('logo')){await push('logo')}
   if(any(LOGO,isRef)){setSyn('Memuat logo…');await hydrate(LOGO)}
   if(any(items,v=>isDU(v)&&!UP.has(v)))await push('items');
   if(any(LOGO,v=>isDU(v)&&!UP.has(v)))await push('logo');
@@ -384,7 +406,7 @@ function initCloud(){
   sync();
 }
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-const isP=i=>!!(i.proses||i.reg);
+const isP=i=>!!(i.proses||i.reg||eligible(i));
 function render(){
   const q=$('cari').value.trim().toLowerCase();
   const nP=items.filter(isP).length;
@@ -393,7 +415,7 @@ function render(){
   const list=items.filter(i=>isP(i)===(sbMode==='p')&&[i.nama,i.jenis,i.njenis,i.abv,i.kemasan,i.prin,i.aprin,i.pab,i.apab,i.pic].join(' ').toLowerCase().includes(q));
   $('cnt').textContent=list.length+' barang'+(sbMode==='p'?' dalam proses':'');
   const sub=v=>v?'<div class="fnm">'+esc(v)+'</div>':'';
-  $('tb').innerHTML=list.length?list.map((i,n)=>'<tr><td>'+(n+1)+'</td><td>'+esc(i.nama)+sub(i.jenis)+sub(i.njenis)+'</td><td>'+(i.abv?esc(i.abv)+'%':'-')+sub(i.kemasan)+'</td><td>'+esc(i.prin||'-')+sub(i.aprin)+'</td><td>'+esc(i.pab||'-')+sub(i.apab)+'</td><td>'+esc(i.pic||'-')+'</td><td class="a"><button data-e="'+i.id+'">Ubah</button> '+(isP(i)?'<button data-k="'+i.id+'">Kembalikan</button> ':'')+'<button class="d" data-d="'+i.id+'">Hapus</button></td></tr>').join(''):'<tr><td colspan="7" class="empty">'+(sbMode==='p'?'Belum ada produk yang sedang diproses NIE-nya.':'Belum ada data.')+'</td></tr>';
+  $('tb').innerHTML=list.length?list.map((i,n)=>'<tr><td>'+(n+1)+'</td><td><b>'+esc(i.prin||'-')+'</b>'+sub(i.aprin)+(i.pic?'<div class="fnm">PIC: '+esc(i.pic)+'</div>':'')+'</td><td><b>'+esc(i.pab||'-')+'</b>'+sub(i.apab)+'</td><td>'+esc(i.nama)+sub(i.jenis)+sub(i.njenis)+sub(i.kemasan)+'</td><td>'+(i.abv?esc(i.abv)+'%':'-')+'</td><td class="a"><button data-e="'+i.id+'">Ubah</button> '+((i.proses||i.reg)?'<button data-k="'+i.id+'">Kembalikan</button> ':'')+'<button class="d" data-d="'+i.id+'">Hapus</button></td></tr>').join(''):'<tr><td colspan="6" class="empty">'+(sbMode==='p'?'Belum ada produk yang sedang diproses NIE-nya.':'Belum ada data.')+'</td></tr>';
 }
 let sbMode='d';
 const MF=['nama','jenis','njenis','abv','kemasan','prin','aprin','pab','apab','pic'];
@@ -404,7 +426,35 @@ function autoFill(k,ak){const v=$(k).value.trim().toLowerCase();if(!v)return;con
 [['prin','aprin'],['pab','apab']].forEach(([k,ak])=>{const h=e=>{if(e.type==='change'||!e.inputType||e.inputType==='insertReplacementText')autoFill(k,ak)};$(k).addEventListener('input',h);$(k).addEventListener('change',h)});
 function openM(it){auto={};fillDl();editId=it?it.id:null;MF.forEach(k=>$(k).value=it?(it[k]||''):'');$('mt').textContent=it?'Ubah Barang':'Tambah Barang';$('mo').style.display='flex';$('nama').focus()}
 function closeM(){$('mo').style.display='none';editId=null}
-$('tambah').onclick=()=>openM();
+$('tambah').onclick=()=>openP();
+$('tambah').textContent='+ Tambah Principal';
+function p7blk(n){return '<div class="p7i" style="border:1px solid var(--bd);border-radius:10px;padding:10px;margin-top:10px"><div class="row" style="margin-top:0"><b class="p7n">Barang '+n+'</b><span class="sp"></span><button class="d" data-p7r="1">Hapus</button></div><div class="mg">'
++'<div><label>Nama Barang</label><input data-f="nama" placeholder="mis. DE KUYPER Creme de Menthe Green"></div>'
++'<div><label>Kategori Pangan</label><input data-f="jenis" list="dl_jenis" placeholder="mis. Minuman"></div>'
++'<div><label>Nama Jenis</label><input data-f="njenis" list="dl_njenis" placeholder="mis. Liqueur"></div>'
++'<div><label>ABV (%)</label><input data-f="abv" list="dl_abv" inputmode="decimal" placeholder="mis. 24"></div>'
++'<div><label>Kemasan</label><input data-f="kemasan" list="dl_kem" placeholder="mis. Botol kaca ( 700 mL )"></div>'
++'<div><label>Pabrik</label><input data-f="pab" list="dl_pab"></div>'
++'<div><label>Alamat Pabrik</label><textarea data-f="apab" rows="2"></textarea></div></div></div>'}
+function p7num(){const b=[...document.querySelectorAll('#p7b .p7i')];b.forEach((e,i)=>{e.querySelector('.p7n').textContent='Barang '+(i+1);e.querySelector('[data-p7r]').style.display=b.length>1?'':'none'})}
+function p7addB(){$('p7b').insertAdjacentHTML('beforeend',p7blk($('p7b').children.length+1));p7num()}
+function openP(){fillDl();['p7p','p7a','p7c'].forEach(i=>$(i).value='');$('p7b').innerHTML='';p7addB();$('mo7').style.display='flex';$('p7p').focus()}
+function closeP(){$('mo7').style.display='none'}
+$('p7add').onclick=()=>{p7addB();const l=$('p7b').lastElementChild;l.scrollIntoView({block:'nearest'});l.querySelector('[data-f=nama]').focus()};
+$('p7x').onclick=closeP;
+$('mo7').onclick=e=>{if(e.target.id==='mo7')closeP();const r=e.target.closest('[data-p7r]');if(r){r.closest('.p7i').remove();p7num()}};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeP()});
+const p7fill=e=>{const t=e.target;if(e.type!=='change'&&e.inputType&&e.inputType!=='insertReplacementText')return;
+  if(t.id==='p7p'){const v=t.value.trim().toLowerCase(),f=v&&items.find(i=>(i.prin||'').trim().toLowerCase()===v);if(f){if(!$('p7a').value.trim()&&f.aprin)$('p7a').value=f.aprin;if(!$('p7c').value.trim()&&f.pic)$('p7c').value=f.pic}}
+  if(t.dataset&&t.dataset.f==='pab'){const v=t.value.trim().toLowerCase(),f=v&&items.find(i=>(i.pab||'').trim().toLowerCase()===v&&i.apab),a=t.closest('.p7i').querySelector('[data-f=apab]');if(f&&!a.value.trim())a.value=f.apab}};
+$('mo7').addEventListener('input',p7fill);$('mo7').addEventListener('change',p7fill);
+$('p7s').onclick=()=>{
+  const prin=$('p7p').value.trim();if(!prin){$('p7p').focus();return}
+  const base={prin,aprin:$('p7a').value.trim(),pic:$('p7c').value.trim()},out=[];
+  document.querySelectorAll('#p7b .p7i').forEach(e=>{const v={};e.querySelectorAll('[data-f]').forEach(x=>v[x.dataset.f]=x.value.trim());v.abv=v.abv.replace(',','.');if(v.nama)out.push(Object.assign({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),dibuat:new Date().toISOString()},base,v))});
+  if(!out.length){alert('Isi minimal satu barang (Nama Barang).');const f=document.querySelector('#p7b [data-f=nama]');if(f)f.focus();return}
+  items.unshift(...out);save();closeP();render();
+};
 $('batal').onclick=closeM;
 $('mo').onclick=e=>{if(e.target.id==='mo')closeM()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
@@ -527,20 +577,21 @@ function bRow(i,o){
   const head=[[i.jenis,i.njenis].filter(Boolean).join(' - '),ab].filter(Boolean).join(' ');
   const title=head+(i.nama?(head?' - ':'')+i.nama:'');
   const fld=(k,ph)=>sp[k]?esc(sp[k]):(o.edit&&sp.fd?'<input data-sf="'+k+':'+i.id+'" placeholder="'+ph+'" style="min-width:150px">':'-');
-  return '<tr><td>'+fld('ng','Nomor pengajuan')+'</td>'
+  return '<tr class="tp"><td>'+fld('ng','Nomor pengajuan')+'</td>'
    +'<td>'+fld('bid','Billing ID')+(sp.bb?'<div class="fnm">'+fmtD(sp.bb)+' 00:00</div>':'')+'</td>'
-   +'<td><b>'+esc(title)+'</b>'+(o.rev||'')+(i.kemasan?'<div class="fnm">'+esc(i.kemasan)+'</div>':'')+'<div class="fnm">'+esc(i.prin||'-')+'</div></td>'
+   +'<td><b>'+esc(title)+'</b>'+(o.rev||'')+(i.kemasan?'<div class="fnm">'+esc(i.kemasan)+'</div>':'')+(o.noPrin?'':'<div class="fnm">'+esc(i.prin||'-')+'</div>')+'</td>'
    +'<td>'+esc(pn||'-')+(pa?'<div class="fnm">'+esc(pa)+'</div>':'')+'</td>'
-   +'<td>'+(sp.no?esc(sp.no):'')+(sp.td?'<div class="fnm">'+fmtD(sp.td)+'</div>':'')+(o.spb||'')+(sMsg[i.id]?'<div class="fnm">'+esc(sMsg[i.id])+'</div>':'')+'</td>'
-   +'<td><div class="bar" style="min-width:90px"><i style="width:'+p+'%"></i></div><span class="cnt">'+p+'%</span></td></tr>'+(o.sub||'');
+   +'<td>'+(sp.no?esc(sp.no):'')+(o.spbIn?' &nbsp;'+o.spbIn:'')+(sp.td?'<div class="fnm">'+fmtD(sp.td)+'</div>':'')+(o.spb||'')+(sMsg[i.id]?'<div class="fnm">'+esc(sMsg[i.id])+'</div>':'')+'</td>'
+   +(o.act!==undefined?'<td>'+o.act+'</td>':o.noKel?'':'<td><div class="bar" style="min-width:90px"><i style="width:'+p+'%"></i></div><span class="cnt">'+p+'%</span></td>')+'</tr>'+(o.sub||'');
 }
 function render3(){
   const l=items.filter(i=>!i.reg&&eligible(i));
   $('c4').textContent=l.length+' barang';
-  $('l4').innerHTML=l.length?'<div class="tw"><table><thead><tr><th>Nomor Pengajuan</th><th>Billing ID</th><th>Produk</th><th>Produsen</th><th>SPB</th><th>Kelengkapan</th></tr></thead><tbody>'+l.map(i=>{const ok=i.spb&&i.spb.fd;
-    const spb='<div style="margin-top:4px">'+(ok?'<a href="#" data-vs="'+i.id+'">'+esc(i.spb.fn||'SPB.pdf')+'</a>':'')+'</div>'
+  $('l4').innerHTML=l.length?'<div class="tw"><table><thead><tr><th>Nomor Pengajuan</th><th>Billing ID</th><th>Produk</th><th>Produsen</th><th>SPB</th></tr></thead><tbody>'+l.map(i=>{const ok=i.spb&&i.spb.fd;
+    const spb=''
       +'<div class="row" style="margin:4px 0 0;gap:6px;align-items:center">'+'<label class="fl">'+(ok?'Ganti SPB':'Unggah SPB (pdf)')+'<input type="file" accept="application/pdf,.pdf" data-spb="'+i.id+'" hidden></label>'+(ok?'<button class="d" data-rs="'+i.id+'" title="Hapus SPB">hapus</button><button class="p" data-sub="'+i.id+'">Submit</button>':'')+'</div>';
-    return bRow(i,{spb:spb,edit:true})}).join('')+'</tbody></table></div>':'<div class="empty">Belum ada barang yang memenuhi syarat (data \u2265 90% dan pabrik Siap + Disetujui).</div>';
+    const spbIn=ok?'<a href="#" data-vs="'+i.id+'" title="'+esc(i.spb.fn||'SPB.pdf')+'">Lihat</a>':'';
+    return bRow(i,{spb:spb,spbIn:spbIn,noKel:true,noPrin:true,edit:true})}).join('')+'</tbody></table></div>':'<div class="empty">Belum ada barang yang memenuhi syarat (data \u2265 90% dan pabrik Siap + Disetujui).</div>';
 }
 const BLN={januari:1,jan:1,februari:2,feb:2,february:2,maret:3,mar:3,march:3,april:4,apr:4,mei:5,may:5,juni:6,jun:6,june:6,juli:7,jul:7,july:7,agustus:8,agu:8,aug:8,august:8,september:9,sep:9,sept:9,oktober:10,okt:10,oct:10,october:10,november:11,nov:11,nop:11,desember:12,des:12,dec:12,december:12};
 function parseNie(raw){
@@ -579,6 +630,8 @@ function parseSpb(raw){
   if(after){const d=after.slice(0,80).match(new RegExp(dre,'i'));if(d)o.td=iso(d[1],d[2],d[3])}
   m=t.match(new RegExp('sampai\\s*(?:dengan\\s*)?tanggal\\s*'+dre,'i'));
   if(m)o.bb=iso(m[1],m[2],m[3]);
+  m=t.match(/tarif[\s\S]{0,250}?(?<![\d.,])(?:Rp\.?\s*)?(\d{1,3}(?:[.,]\d{3})+)(?![\d])/i);
+  if(m){const v=parseInt(m[1].replace(/\D/g,''),10);if(v>0)o.tf=v}
   return o;
 }
 
@@ -606,10 +659,11 @@ function openDU(du,fn){const w=window.open('','_blank');getBlob(du).then(b=>{con
 function parseNieLabel(raw){
   const t=String(raw||'').replace(/\s+/g,' ');
   const g=(re)=>{const m=t.match(re);return m?m[1].trim():''};
-  const o={nm:'',sn:'',ib:'',nb:'',dp:'',di:''};
+  const o={nm:'',sn:'',ib:'',nb:'',dp:'',di:'',al:''};
   o.nm=g(/Nama\s*Dagang\s*:\s*(.+?)\s+(?:3\.\s*)?Jenis\s*Kemasan/i);
   const jn=g(/Nama\s*Jenis\s*Pangan\s*:\s*(.+?)\s+(?:2\.\s*)?Nama\s*Dagang/i);
   o.sn=jn.replace(/\s*\(.*$/,'').trim();
+  const am=jn.match(/\(\s*Mengandung\s*alkohol[^\d(]*([\d]+(?:[.,]\d+)?)\s*%/i);o.al=am?am[1].replace(',','.'):'';
   const km=g(/Jenis\s*Kemasan[^:]*:\s*(.+?)\s+(?:4\.\s*)?(?:a\.\s*)?Nama\s*Produsen/i);
   const kk=km.match(/\(\s*([^)]*?)\s*\)/);
   o.ib=kk?kk[1].trim():'';
@@ -667,6 +721,7 @@ $('l5').onclick=e=>{
     if(!x.no||!x.exp||!x.fd){alert('Lengkapi dulu: nomor NIE, masa berlaku, dan file NIE.');return}
     if(!confirm('Simpan NIE \u201c'+it.nama+'\u201d dan pindahkan ke Label BPOM?'))return;
     it.nie={no:x.no,exp:x.exp,fn:x.fn,fd:x.fd,lab:x.lab||undefined,tgl:new Date().toISOString()};delete it.reg.d;save();render4();return}
+  if(d.am){e.preventDefault();actOpen=actOpen===d.am?null:d.am;render4();return}
   const id=d.rv||d.rm||d.rl;if(!id)return;e.preventDefault();
   const it=items.find(i=>i.id===id);if(!it)return;
   if(d.rv){revOpen=revOpen===id?null:id;render4();return}
@@ -698,40 +753,56 @@ $('l5').onchange=e=>{
       if(!isP)return;
       nMsg[id]+=' Membaca data label dari NIE (OCR, bisa sampai 1 menit)\u2026';render4();
       return nieLabelFromPdf(f,tx).then(lb=>{
-        x.lab=lb;const n=['nm','sn','ib','nb','dp','di','kp','qr'].filter(k=>lb[k]).length;
+        x.lab=lb;const n=['nm','sn','ib','nb','al','dp','di','kp','qr'].filter(k=>lb[k]).length;
         nMsg[id]=nMsg[id].replace(/ Membaca data label.*$/,'')+(n?' Data label terbaca ('+n+'/8). Periksa isian di bawah.':' Data label tidak terbaca, isi manual jika perlu.');
         save();render4();
       });
     }).catch(()=>{nMsg[id]='Gagal membaca file otomatis (perlu internet). Isi manual.';render4()});
   };r.readAsDataURL(f);
 };
+
+/* ===== Editor Komposisi (tebal/miring) ===== */
+function rtClean(h){const t=document.createElement('template');t.innerHTML=String(h||'');
+  const w=n=>{let o='';n.childNodes.forEach(c=>{if(c.nodeType===3)o+=esc(c.nodeValue);else if(c.nodeType===1){const g=c.tagName.toLowerCase(),i=w(c);
+    if(g==='b'||g==='strong'||(c.style&&/bold|[6-9]00/.test(c.style.fontWeight||'')))o+='<b>'+i+'</b>';
+    else if(g==='i'||g==='em'||(c.style&&c.style.fontStyle==='italic'))o+='<i>'+i+'</i>';
+    else if(g==='br')o+='<br>';else if(g==='div'||g==='p')o+=(o?'<br>':'')+i;else o+=i}});return o};
+  return w(t.content)}
+function rtEd(h,attr,inl){return '<div class="rt'+(inl?' rti':'')+'"><div class="rtb"><button type="button" data-rt="bold" title="Tebal"><b>B</b></button><button type="button" data-rt="italic" title="Miring"><i>I</i></button></div><div class="rte" contenteditable="true" '+attr+'>'+rtClean(h)+'</div></div>'}
+document.addEventListener('mousedown',e=>{const b=e.target.closest('[data-rt]');if(b){e.preventDefault();document.execCommand(b.dataset.rt)}});
+document.addEventListener('paste',e=>{if(e.target.closest&&e.target.closest('.rte')){e.preventDefault();document.execCommand('insertText',false,(e.clipboardData||window.clipboardData).getData('text/plain'))}});
+$('l5').addEventListener('focusout',e=>{const d=e.target.dataset;if(d&&d.lfr){const q=d.lfr.split(':'),it0=items.find(i=>i.id===q[1]);if(it0){const x0=dr(it0);x0.lab=x0.lab||{};x0.lab[q[0]]=rtClean(e.target.innerHTML).trim();save()}}});
 function labFields(i,x){
   const lb=x.lab;if(!lb)return '';
-  const f=(k,l,ta)=>'<label class="cnt" style="margin:0;flex:1 1 230px">'+l+(ta?'<textarea rows="3" data-lf="'+k+':'+i.id+'">'+esc(lb[k]||'')+'</textarea>':'<input data-lf="'+k+':'+i.id+'" value="'+esc(lb[k]||'')+'">')+'</label>';
+  const f=(k,l,ta,w)=>'<label class="cnt" style="margin:0;'+(w?'flex:0 0 '+w+';width:'+w:'flex:1 1 230px')+'">'+l+(ta?'<textarea rows="3" data-lf="'+k+':'+i.id+'">'+esc(lb[k]||'')+'</textarea>':'<input data-lf="'+k+':'+i.id+'" value="'+esc(lb[k]||'')+'">')+'</label>';
   return '<div class="row" style="margin:10px 0 0;gap:8px;flex-wrap:wrap;align-items:flex-start"><div class="cnt" style="width:100%"><b>Data Label dari NIE</b> (terbaca otomatis, bisa diedit; dipakai di bar 6)</div>'
    +(lb.qr?'<img src="'+lb.qr+'" alt="QR" style="height:70px;border:1px solid var(--bd);border-radius:6px;background:#fff">':'')
-   +f('nm','Nama Dagang')+f('sn','Nama Jenis Pangan')+f('ib','Isi Bersih')+f('nb','Nomor BPOM RI ML')
-   +f('kp','Komposisi',1)+f('dp','Diproduksi Oleh',1)+f('di','Diimpor Oleh',1)+'</div>';
+   +f('nm','Nama Dagang')+f('sn','Nama Jenis Pangan')+f('al','Alkohol (% v/v)',0,'110px')+f('ib','Isi Bersih')+f('nb','Nomor BPOM RI ML',0,'170px')
+   +'<div class="cnt" style="margin:0;flex:1 1 230px">Komposisi'+rtEd(lb.kp,'data-lfr="kp:'+i.id+'"',1)+'</div>'+f('dp','Diproduksi Oleh',1)+f('di','Diimpor Oleh',1)+'</div>';
 }
 function render4(){
   const l=items.filter(i=>i.reg&&!i.nie);
   $('c5').textContent=l.length+' barang';
-  $('l5').innerHTML=l.length?'<div class="tw"><table><thead><tr><th>Nomor Pengajuan</th><th>Billing ID</th><th>Produk</th><th>Produsen</th><th>SPB</th><th>Kelengkapan</th></tr></thead><tbody>'+l.map(i=>{
+  $('l5').innerHTML=l.length?'<div class="tw"><table><thead><tr><th>Nomor Pengajuan</th><th>Billing ID</th><th>Produk</th><th>Produsen</th><th>SPB</th><th>Action</th></tr></thead><tbody>'+l.map(i=>{
     const x=(i.reg&&i.reg.d)||{};
-    const sub='<tr class="dt"><td colspan="6"><div class="row" style="margin:0;gap:8px;align-items:center;flex-wrap:wrap"><label class="cnt" style="margin:0">Nomor NIE <input data-nn="'+i.id+'" value="'+esc(x.no||'')+'" placeholder="mis. ML 536021012345" style="min-width:190px"></label><label class="cnt" style="margin:0">Masa berlaku <input type="date" data-nx="'+i.id+'" value="'+esc(x.exp||'')+'"></label><label class="fl">'+(x.fd?'Ganti NIE':'Unggah NIE')+'<input type="file" accept="application/pdf,image/*" data-nf="'+i.id+'" hidden></label>'+(x.fd?'<a href="#" data-nv="'+i.id+'">'+esc(x.fn||'NIE')+'</a><button class="d" data-nd="'+i.id+'">hapus</button>':'')+'<button class="p" data-ns="'+i.id+'">Simpan</button>'+(nMsg[i.id]?'<span class="cnt">'+esc(nMsg[i.id])+'</span>':'')+'</div>'+labFields(i,x)+'</td></tr>';
-    const rev=' &nbsp;<a href="#" data-rv="'+i.id+'">Revisi rancangan</a> <button class="d" data-b5="'+i.id+'">\u21a9 Kembalikan ke Proses SPB</button>'+(revOpen===i.id?' <button data-rm="'+i.id+'">Rancangan ML BPOM</button> <button data-rl="'+i.id+'">Rancangan Label</button>':'');
-    const spb=i.spb&&i.spb.fd?'<div><a href="#" data-vs="'+i.id+'">'+esc(i.spb.fn||'SPB.pdf')+'</a></div>':'';
-    return bRow(i,{rev:rev,spb:spb,sub:sub})}).join('')+'</tbody></table></div>':'<div class="empty">Belum ada barang di Proses Pendaftaran.</div>';
+    const sub='<tr class="dt"><td colspan="6"><div class="row" style="margin:0;gap:8px;align-items:flex-end;flex-wrap:wrap"><label class="cnt" style="margin:0">Nomor NIE <input data-nn="'+i.id+'" value="'+esc(x.no||'')+'" placeholder="mis. ML 536021012345" style="min-width:190px"></label><label class="cnt" style="margin:0">Masa berlaku <input type="date" data-nx="'+i.id+'" value="'+esc(x.exp||'')+'"></label>'+'<button class="p" data-ns="'+i.id+'">Simpan</button>'+(nMsg[i.id]?'<span class="cnt" style="padding-bottom:10px">'+esc(nMsg[i.id])+'</span>':'')+'</div>'+labFields(i,x)+'</td></tr>';
+    const sr='style="font-size:12px;padding:3px 10px;text-align:left"';
+    const rev='<div style="display:flex;gap:10px;align-items:flex-start;margin-top:6px"><a href="#" data-rv="'+i.id+'">Revisi</a>'+(revOpen===i.id?'<div style="display:flex;flex-direction:column;gap:4px;align-items:stretch"><button '+sr+' data-rm="'+i.id+'">Rancangan ML BPOM</button><button '+sr+' data-rl="'+i.id+'">Rancangan Label</button></div>':'')+'</div>';
+    const spbIn=i.spb&&i.spb.fd?'<a href="#" data-vs="'+i.id+'" title="'+esc(i.spb.fn||'SPB.pdf')+'">Lihat</a>':'';
+    const op=actOpen===i.id,sm='style="font-size:12px;padding:3px 8px"';
+    const act='<div data-actwrap><button class="d" data-am="'+i.id+'" title="Menu" style="font-size:18px;line-height:1;padding:2px 10px">\u2630</button>'+(op?'<div class="amenu" style="display:flex;flex-direction:column;gap:6px;align-items:flex-start;margin-top:6px"><button class="d" '+sm+' data-b5="'+i.id+'">\u21a9 Kembalikan ke Proses SPB</button><div class="row" style="margin:0;gap:6px;align-items:center"><label class="fl" '+sm+'>'+(x.fd?'Ganti NIE':'Unggah NIE')+'<input type="file" accept="application/pdf,image/*" data-nf="'+i.id+'" hidden></label>'+(x.fd?'<a href="#" class="fl" '+sm+' data-nv="'+i.id+'" title="'+esc(x.fn||'NIE')+'">Lihat NIE</a><button class="d" '+sm+' data-nd="'+i.id+'">hapus</button>':'')+'</div></div>':'')+'</div>';
+    return bRow(i,{rev:rev,spbIn:spbIn,sub:sub,act:act,noPrin:true})}).join('')+'</tbody></table></div>':'<div class="empty">Belum ada barang di Proses Pendaftaran.</div>';
 }
 function render5(){
   const l=items.filter(i=>i.nie);
   $('c6').textContent=l.length+' barang';
   $('l6').innerHTML=l.length?l.map(i=>'<div class="bi" style="cursor:default"><div class="bn"><b><a href="#" data-n6="'+i.id+'">'+esc(itTitle(i))+'</a></b> &nbsp;<a href="#" data-l6="'+i.id+'">Label</a>'+(i.kemasan?'<div class="fnm">'+esc(i.kemasan)+'</div>':'')+' &nbsp;<button class="d" data-b6="'+i.id+'">\u21a9 Kembalikan ke Proses Pendaftaran</button><div class="meta"><a href="#" data-n6="'+i.id+'">NIE '+esc(i.nie.no)+'</a> \u00b7 berlaku s.d. '+fmtD(i.nie.exp)+'</div></div></div>').join(''):'<div class="empty">Belum ada barang dengan NIE tersimpan.</div>';
 }
-function mlOfReg(it){const pick=a=>a&&a.find(z=>z.n===RML),x=pick(it.rev&&it.rev.docs)||pick(docsOf(it));const m=Object.assign(mlDef(it),(x&&x.ml)||{}),L=(it.nie&&it.nie.lab)||{};['nm','sn','ib','nb','dp','di','kp'].forEach(k=>{if(L[k])m[k]=L[k]});return m}
+function mlOfReg(it){const pick=a=>a&&a.find(z=>z.n===RML),x=pick(it.rev&&it.rev.docs)||pick(docsOf(it));const m=Object.assign(mlDef(it),(x&&x.ml)||{}),L=(it.nie&&it.nie.lab)||{};['nm','sn','ib','nb','dp','di','kp'].forEach(k=>{if(L[k])m[k]=L[k]});if(L.al)m.alk=L.al;return m}
 function closeM5(){$('mo5').style.display='none';$('m5_b').innerHTML=''}
 $('m5_close').onclick=closeM5;
 $('mo5').onclick=e=>{if(e.target.id==='mo5')closeM5()};
+document.addEventListener('click',e=>{if(actOpen&&!e.target.closest('[data-actwrap]')){actOpen=null;document.querySelectorAll('.amenu').forEach(m=>m.remove())}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('mo5').style.display!=='none')closeM5()});
 $('l6').onclick=e=>{
   const d=e.target.dataset;
@@ -764,34 +835,48 @@ function terbilang(n){const a=['','ONE','TWO','THREE','FOUR','FIVE','SIX','SEVEN
   if(!n)return 'ZERO';const g=[[1e9,'BILLION'],[1e6,'MILLION'],[1e3,'THOUSAND'],[1,'']];let o=[];g.forEach(([v,w])=>{const q=Math.floor(n/v);if(q){o.push(u(q)+(w?' '+w:''));n%=v}});return o.join(' ')}
 const rp=n=>(+n||0).toLocaleString('en-US');
 const exList=()=>items.filter(i=>!i.reg&&eligible(i)&&i.spb&&i.spb.fd);
+let exCfg={sub:'PRODUK REGISTRASI ML BARU BPOM RBA',kota:'Jakarta',tgl:'',say:'',t:['Purposed by,','Approved By,','Checked by,','Approved by,'],n:['Rudy/ Robi','Dewi H. F.','Leni/ John','Rio Gozal']};
+try{const z=JSON.parse(localStorage.getItem('bpom_exp_v1')||'null');if(z)Object.assign(exCfg,z)}catch(e){}
+const exSave=()=>{try{localStorage.setItem('bpom_exp_v1',JSON.stringify(exCfg))}catch(e){}};
+const exName=i=>[i.nama,i.njenis].filter(Boolean).join(' ')+(i.jenis?' - '+i.jenis:'')+(i.abv&&+String(i.abv).replace(',','.')>0?' '+String(i.abv).replace('.',',').replace(/,0+$/,'')+'%':'');
+const exJ=i=>{const sp=i.spb||{};return (sp.jm!==undefined&&sp.jm!=='')?(+sp.jm||0):(+sp.tf||0)};
 function exHTML(ed){
-  const l=exList(),tot=l.reduce((a,i)=>a+(+i.spb.jm||0),0),d=new Date(),tg=d.getDate()+' '+['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][d.getMonth()]+' '+d.getFullYear();
+  const l=exList(),tot=l.reduce((a,i)=>a+exJ(i),0),d=new Date(),tg=exCfg.tgl||(d.getDate()+' '+['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][d.getMonth()]+' '+d.getFullYear()),say=exCfg.say||(terbilang(tot)+' RUPIAH');
   const th='style="border:1px solid #000;padding:4px 6px;background:#d9d9d9;text-align:center"',td='style="border:1px solid #000;padding:3px 6px"';
-  const rows=l.map((i,k)=>{const sp=i.spb;return '<tr><td '+td+' align="center">'+(k+1)+'</td><td '+td+' align="center">'+esc(sp.ng||'-')+'</td><td '+td+' align="center">'+esc(sp.bid||'-')+'</td><td '+td+'>'+esc(i.nama||'')+'</td><td '+td+'><span style="float:left">Rp</span><span style="float:right">'
-    +(ed?'<input data-ej="'+i.id+'" value="'+(sp.jm||'')+'" inputmode="numeric" style="width:100px;text-align:right">':rp(sp.jm))+'</span></td><td '+td+' align="center">'
+  const inp=(attr,v,w,al)=>'<input '+attr+' value="'+esc(v)+'" style="width:'+w+';'+(al?'text-align:'+al+';':'')+'font:inherit;padding:2px 4px">';
+  const rows=l.map((i,k)=>{const sp=i.spb,v=(sp.xn!==undefined?sp.xn:exName(i))||'',a=sp.xa!==undefined?sp.xa:(sp.ng||''),bd=sp.xb!==undefined?sp.xb:(sp.bid||'');
+    return '<tr><td '+td+' align="center">'+(k+1)+'</td><td '+td+' align="center">'+(ed?inp('data-ex="a:'+i.id+'"',a,'150px','center'):esc(a||'-'))+'</td><td '+td+' align="center">'+(ed?inp('data-ex="b:'+i.id+'"',bd,'150px','center'):esc(bd||'-'))+'</td><td '+td+'>'+(ed?inp('data-ex="n:'+i.id+'"',v,'100%'):esc(v))+'</td><td '+td+'><span style="float:left">Rp</span><span style="float:right">'
+    +(ed?'<input data-ej="'+i.id+'" value="'+(exJ(i)||'')+'" inputmode="numeric" style="width:100px;text-align:right">':rp(exJ(i)))+'</span></td><td '+td+' align="center">'
     +(ed?'<input data-es="'+i.id+'" value="'+esc(sp.st||'')+'" list="exst" style="width:70px">':esc(sp.st||''))+'</td></tr>'}).join('');
   const lg=(typeof LOGO!=='undefined'&&LOGO.src)?'<img src="'+LOGO.src+'" style="height:70px;float:right">':'';
+  const sg=[0,1,2,3].map(k=>'<div style="flex:1;border:0">'+(ed?inp('data-ec="t'+k+'"',exCfg.t[k],'90%'):esc(exCfg.t[k]))+'<div style="height:70px"></div><b>'+(ed?inp('data-ec="n'+k+'"',exCfg.n[k],'90%'):esc(exCfg.n[k]))+'</b></div>').join('');
   return '<div style="font-family:Calibri,Arial,sans-serif;font-size:13px;color:#000;background:#fff;padding:16px">'+lg
    +'<div style="font-size:20px;font-weight:bold">PAYMENT REQUEST</div><div style="font-size:16px;font-weight:bold">DIVISI : &nbsp;IMPORT</div>'
-   +'<div style="margin:22px 0 6px 28px;font-size:14px"><b>Subject: &nbsp;&nbsp;PRODUK REGISTRASI ML BARU BPOM RBA</b></div>'
-   +'<table style="border-collapse:collapse;width:100%"><thead><tr><th '+th+'>No</th><th '+th+'>No Aju</th><th '+th+'>Billing ID No</th><th '+th+'>Nama Produk</th><th '+th+'>Jumlah</th><th '+th+'>Status</th></tr></thead><tbody>'
+   +'<div style="margin:22px 0 6px 28px;font-size:14px"><b>Subject: &nbsp;&nbsp;'+(ed?inp('data-ec="sub"',exCfg.sub,'420px'):esc(exCfg.sub))+'</b></div>'
+   +'<table style="border-collapse:collapse;width:100%;min-width:0"><thead><tr><th '+th+'>No</th><th '+th+'>No Aju</th><th '+th+'>Billing ID No</th><th '+th+'>Nama Produk</th><th '+th+'>Jumlah</th><th '+th+'>Status</th></tr></thead><tbody>'
    +(rows||'<tr><td '+td+' colspan="6" align="center">Belum ada barang dengan SPB terunggah.</td></tr>')
    +'<tr><td '+th+' colspan="4" style="text-align:center"><b>TOTAL</b></td><td '+th+'><b><span style="float:left">Rp</span><span style="float:right">'+rp(tot)+'</span></b></td><td '+th+'></td></tr></tbody></table>'
-   +'<div style="margin:18px 0 0 28px"><span>Say : </span> &nbsp;&nbsp;<b style="letter-spacing:.5px">'+terbilang(tot)+' RUPIAH</b></div>'
-   +'<div style="margin:18px 0 0 28px">Jakarta, '+tg+'</div>'
-   +'<table style="width:100%;margin-top:14px;text-align:left"><tr><td>Purposed by,</td><td>Approved By,</td><td>Checked by,</td><td>Approved by,</td></tr><tr><td style="height:70px"></td></tr><tr style="font-weight:bold"><td>Rudy/ Robi</td><td>Dewi H. F.</td><td>Leni/ John</td><td>Rio Gozal</td></tr></table></div>'}
+   +'<div style="margin:18px 0 0 28px"><span>Say : </span> &nbsp;&nbsp;<b style="letter-spacing:.5px">'+(ed?inp('data-ec="say"',say,'420px'):esc(say))+'</b></div>'
+   +'<div style="margin:18px 0 0 28px">'+(ed?inp('data-ec="kota"',exCfg.kota,'110px')+', '+inp('data-ec="tgl"',tg,'170px'):esc(exCfg.kota)+', '+esc(tg))+'</div>'
+   +'<div style="display:flex;gap:10px;margin:14px 0 0 28px;border:0">'+sg+'</div></div>'}
+async function exFillTarif(){
+  for(const i of exList()){const sp=i.spb;if(sp.tf!==undefined||sp.tfTried)continue;sp.tfTried=1;
+    try{const b=await getBlob(sp.fd),f=new File([b],sp.fn||'SPB.pdf',{type:'application/pdf'}),o=parseSpb(await readNieText(f));if(o.tf)sp.tf=o.tf;save();const m=document.getElementById('mo6');if(m&&m.style.display!=='none')exOpen()}catch(e){}}}
 function exOpen(){
   let m=document.getElementById('mo6');
   if(!m){m=document.createElement('div');m.id='mo6';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;overflow:auto;padding:16px';
     m.onclick=e=>{const t=e.target,d=t.dataset;
       if(t===m||d.exx!==undefined)m.style.display='none';
       else if(d.exp!==undefined){const w=window.open('','_blank');if(w){w.document.write('<title>Payment Request</title>'+exHTML(false));w.document.close();setTimeout(()=>w.print(),400)}}};
-    m.onchange=e=>{const d=e.target.dataset,id=d.ej||d.es,it=items.find(i=>i.id===id);if(!it||!it.spb)return;
-      if(d.ej)it.spb.jm=Math.max(0,parseInt(String(e.target.value).replace(/\D/g,''))||0);else it.spb.st=e.target.value.trim();
+    m.onchange=e=>{const t=e.target,d=t.dataset;
+      if(d.ec){const k=d.ec,v=t.value;if(/^[tn]\d$/.test(k))exCfg[k[0]][+k[1]]=v;else exCfg[k]=v.trim();exSave();exOpen();return}
+      if(d.ex){const q=d.ex.split(':'),it=items.find(i=>i.id===q[1]);if(it&&it.spb){it.spb['x'+q[0]]=t.value.trim();save();exOpen()}return}
+      const id=d.ej||d.es,it=items.find(i=>i.id===id);if(!it||!it.spb)return;
+      if(d.ej){const v=String(t.value).replace(/\D/g,'');if(v==='')delete it.spb.jm;else it.spb.jm=parseInt(v,10)}else it.spb.st=t.value.trim();
       save();exOpen()};
     document.body.appendChild(m)}
   m.innerHTML='<div style="max-width:900px;margin:0 auto"><div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:8px"><span style="color:#fff;margin-right:auto;font-size:12px">Isi Jumlah &amp; Status per barang (tersimpan otomatis).</span><button class="p" data-exp>Cetak / PDF</button><button data-exx>Tutup</button></div><datalist id="exst"><option value="Re-New"><option value="P5"></datalist>'+exHTML(true)+'</div>';
-  m.style.display='block'}
+  m.style.display='block';exFillTarif()}
 $('ex4').onclick=exOpen;
 document.addEventListener('keydown',e=>{const m=document.getElementById('mo6');if(e.key==='Escape'&&m&&m.style.display!=='none')m.style.display='none'});
 $('l4').onchange=e=>{
@@ -827,12 +912,14 @@ function sameEnt(it,names){
   if(x.some(z=>!z||!norm(z.en)||!norm(z.ea)))return false;
   return x.every(z=>norm(z.en)===norm(x[0].en)&&norm(z.ea)===norm(x[0].ea));
 }
-function pkey(i){return (i.prin||'').trim().toLowerCase()}
+function fac(i){let n=(i.pab||'').trim(),a=(i.apab||'').trim();if(!n&&!a){const x=docsOf(i).find(z=>z.n===NKV);if(x){n=(x.en||'').trim();a=(x.ea||'').trim()}}return {n,a}}
+function pkey(i){const f=fac(i);return (f.n||f.a)?norm(f.n)+'|'+norm(f.a):''}
 function grpOf(it){const k=pkey(it);return items.filter(i=>pkey(i)===k)}
 function ppOf(grp){return (grp.find(i=>i.pp&&i.pp!=='Proses')||{}).pp||''}
 function pabDetail(grp){
   const a=grp.find(i=>i.pn!==undefined),b=grp.find(i=>i.pa!==undefined);let dn='',da='';
   for(const i of grp){const x=docsOf(i).find(z=>z.n===NKV);if(x&&(x.en||x.ea)){dn=x.en||'';da=x.ea||'';break}}
+  if(!dn&&!da)for(const i of grp){const f=fac(i);if(f.n||f.a){dn=f.n;da=f.a;break}}
   return {n:a?a.pn:dn,a:b?b.pa:da};
 }
 function prodAuto(it){const g=grpOf(it);if(ppOf(g)!=='Disetujui')return '';const d=pabDetail(g);return [d.n,d.a].filter(Boolean).join('\n')}
@@ -840,21 +927,31 @@ function effProd(it){const g=it.pengajuan||{};return g.prod!==undefined?g.prod:p
 function effKem(it){const g=it.pengajuan||{};return g.kem!==undefined?g.kem:(it.kemasan||'')}
 const EDN=['LOA / Surat Penunjukan','LOE / Surat Pernyataan','CFS / Health Certificate','NKV, HACCP, ISO'];
 function ecell(a){return a.length?a.map(v=>'<div class="ec"><b>'+esc(v.en||'-')+'</b> <span class="b">'+esc(v.ent||'')+'</span>'+(v.ea?'<div class="fnm">'+esc(v.ea)+'</div>':'')+'</div>').join(''):'-'}
+let pMode='d';
 function renderP(){
   const f=$('pflt').value,g={};
-  items.forEach(i=>{const k=(i.prin||'').trim().toLowerCase();(g[k]=g[k]||{n:(i.prin||'').trim()||'(Tanpa principal)',k:k,it:[]}).it.push(i)});
+  items.forEach(i=>{const k=pkey(i);if(!k)return;(g[k]=g[k]||{n:fac(i).n||fac(i).a,k:k,it:[]}).it.push(i)});
   let rows=Object.values(g).map(o=>{
     const e=EDN.map(n=>{const m={};o.it.forEach(i=>{const x=docsOf(i).find(z=>z.n===n);if(x&&(x.en||x.ea)){const kk=[x.ent,x.en,x.ea].join('|').toLowerCase();if(!m[kk])m[kk]=x}});return Object.values(m)});
-    return {n:o.n,k:o.k,a:(o.it.find(i=>i.pp&&i.pp!=='Proses')||{}).pp||'',N:o.it.length,e,ok:o.it.some(i=>sameEnt(i,PA)||sameEnt(i,PB)),pd:pabDetail(o.it)};
+    return {n:o.n,k:o.k,a:(o.it.find(i=>i.pp&&i.pp!=='Proses')||{}).pp||'',fc:fac(o.it[0]),N:o.it.length,e,ok:o.it.some(i=>sameEnt(i,PA)||sameEnt(i,PB)),pd:pabDetail(o.it)};
   });
   rows.sort((a,b)=>a.n.localeCompare(b.n));
+  const MS={d:'',p:'Diajukan',a:'Disetujui'},cn=m=>rows.filter(r=>r.a===MS[m]).length;
+  [['d','Daftar'],['p','Proses'],['a','Disetujui']].forEach(([m,t])=>{const e=$('p3'+m);e.classList.toggle('on',pMode===m);e.textContent=t+(m==='d'?'':' ('+cn(m)+')')});
+  const nm=v=>norm(v);
+  rows.forEach(r=>{r.fn=null;r.fa=null;if(r.a)return;rows.forEach(o=>{if(o===r||!o.a)return;const st=o.a==='Diajukan'?'Proses':'Disetujui';if(nm(r.fc.n)&&nm(r.fc.n)===nm(o.fc.n))r.fn=(r.fn?r.fn+'; ':'')+st+': '+(o.fc.n||'')+' / '+(o.fc.a||'');if(nm(r.fc.a)&&nm(r.fc.a)===nm(o.fc.a))r.fa=(r.fa?r.fa+'; ':'')+st+': '+(o.fc.n||'')+' / '+(o.fc.a||'')})});
+  rows=rows.filter(r=>r.a===MS[pMode]);
   const siap=rows.filter(r=>r.ok).length;
   $('pcnt').textContent=siap+' siap \u00b7 '+(rows.length-siap)+' belum';
   rows=rows.filter(r=>!f||(f==='Siap')===r.ok);
-  $('tbp').innerHTML=rows.length?rows.map(r=>'<tr><td><b>'+esc(r.n)+'</b></td><td>'+r.N+'</td>'+r.e.map(a=>'<td>'+ecell(a)+'</td>').join('')+'<td><span class="b '+(r.ok?'ok':'wip')+'">'+(r.ok?'Siap':'Belum')+'</span></td><td><select data-pk="'+esc(r.k)+'"><option value="">\u2014</option>'+['Diajukan','Disetujui'].map(t=>'<option'+(t===r.a?' selected':'')+'>'+t+'</option>').join('')+'</select></td></tr>'
+  $('tbp').innerHTML=rows.length?rows.map(r=>'<tr><td><b>'+esc(r.fc.n||'-')+'</b>'+(r.fn?' <span title="Nama/alamat sama dengan pabrik di '+esc(r.fn)+'" style="cursor:help">\ud83d\udd34</span>':'')+(r.fc.a?'<div class="fnm">'+esc(r.fc.a)+(r.fa?' <span title="Nama/alamat sama dengan pabrik di '+esc(r.fa)+'" style="cursor:help">\ud83d\udd34</span>':'')+'</div>':'')+'</td><td>'+r.N+'</td>'+r.e.map(a=>'<td>'+ecell(a)+'</td>').join('')+'<td><span class="b '+(r.ok?'ok':'wip')+'">'+(r.ok?'Siap':'Belum')+'</span></td><td>'+(pMode==='d'?(r.ok?'<button class="p" data-pg="'+esc(r.k)+'" data-ps="Diajukan">Proses</button>':'<button disabled title="Status Belum: lengkapi LOA/LOE, CFS, dan NKV/HACCP/ISO di Kelengkapan Dokumen dulu" style="opacity:.45;cursor:not-allowed">Proses</button>'):pMode==='p'?'<button class="p" data-pg="'+esc(r.k)+'" data-ps="Disetujui">Selesai</button> '+'<button data-pb="'+esc(r.k)+'" data-ps="">Kembalikan</button>':'<button data-pb="'+esc(r.k)+'" data-ps="Diajukan">Kembalikan</button>')+'</td></tr>'
     +(r.a?'<tr class="dt"><td colspan="8"><div class="mg"><div><label>Nama Pabrik (dari NKV / HACCP / ISO)</label><input data-pn="'+esc(r.k)+'" value="'+esc(r.pd.n)+'"></div><div><label>Alamat Pabrik</label><textarea rows="2" data-pa="'+esc(r.k)+'">'+esc(r.pd.a)+'</textarea></div></div></td></tr>':'')).join(''):'<tr><td colspan="8" class="empty">Belum ada data.</td></tr>';
 }
 $('pflt').onchange=renderP;
+$('sb3').onclick=e=>{const m=e.target.dataset.p3;if(m){pMode=m;renderP()}};
+$('tbp').onclick=e=>{const d=e.target.dataset;
+  if(d.pb!==undefined){const to=d.ps==='Diajukan'?'Proses':'Daftar';if(!confirm('Kembalikan pabrik ini ke '+to+'?'+(d.ps==='Diajukan'?' Barangnya tidak lagi memenuhi syarat di Proses SPB sampai disetujui lagi.':'')))return;items.forEach(i=>{if(pkey(i)===d.pb)i.pp=d.ps});save();renderP();return}
+  if(d.pg!==undefined){if(d.ps==='Diajukan'&&!items.some(i=>pkey(i)===d.pg&&(sameEnt(i,PA)||sameEnt(i,PB)))){alert('Status masih Belum, belum bisa diproses.');return}items.forEach(i=>{if(pkey(i)===d.pg)i.pp=d.ps});save();renderP()}};
 let eId=null,eAuto='';
 function eKeys(){const p=$('e_t').value==='Principal';return p?['prin','aprin']:['pab','apab']}
 function enList(){$('dl_en').innerHTML=uniq(eKeys()[0]).map(v=>'<option value="'+esc(v)+'">').join('')}
@@ -919,22 +1016,22 @@ function mlHTML(m,ed,qr){
   const mv=ed&&!LOGO.lock;
   const g=LOGO.src?'<div class="mlg'+(mv?' dr ed" data-g="1':'')+'" style="left:'+LOGO.l+'%;top:'+LOGO.t+'%;width:'+LOGO.w+'%"><img src="'+LOGO.src+'" alt="" draggable="false" style="opacity:'+LOGO.o+'">'+(mv?'<i class="rz"></i>':'')+'</div>':'';
   return '<div class="mlw"><div class="ml">'+g
-   +'<div class="mlt"><div class="mlq"><span style="visibility:hidden">BPOMRI</span><div class="mlb">MGP<br>Barcode</div></div><div class="mlh">'+esc(m.jd)+'</div><div class="mlq">BPOMRI'+(qr?'<div class="mlb" style="border:0;padding:0"><img src="'+qr+'" alt="" style="width:100%;height:100%;object-fit:contain"></div>':'<div class="mlb">2D<br>Barcode</div>')+'</div></div>'
+   +'<div class="mlt"><div class="mlq"><span style="visibility:hidden">BPOMRI</span>'+(CO().bc?'<div class="mlb" style="border:0;padding:0"><img src="'+CO().bc+'" alt="" style="width:100%;height:100%;object-fit:contain"></div>':'<div class="mlb">MGP<br>Barcode</div>')+'</div><div class="mlh">'+esc(m.jd)+'</div><div class="mlq">BPOMRI'+(qr?'<div class="mlb" style="border:0;padding:0"><img src="'+qr+'" alt="" style="width:100%;height:100%;object-fit:contain"></div>':'<div class="mlb">2D<br>Barcode</div>')+'</div></div>'
    +'<div class="mln"><div>'+esc(m.nm)+'</div><div>'+esc(m.sn)+'</div></div>'
    +L('Isi Bersih',m.ib)
    +'<div class="mlr">Mengandung  Alkohol \u00b1'+esc(String(m.alk).replace(',','.'))+'% v/v</div>'
-   +L('Kode &amp; Tanggal Produksi',m.kt)+L('Baik digunakan sebelum',m.bg)+L('Komposisi',m.kp)
+   +L('Kode &amp; Tanggal Produksi',m.kt)+L('Baik digunakan sebelum',m.bg)+'<div class="mlr"><b>Komposisi :</b> '+rtClean(m.kp)+'</div>'
    +'<div class="mlr"><b>BPOM RI ML'+(m.nb?' '+esc(m.nb):'')+'</b></div>'
    +L('Diproduksi Oleh',m.dp)+L('Diimpor Oleh',m.di)
    +'<div class="mlx">'+esc(m.pr)+'</div></div></div>';
 }
-function mlRead(){const o={};$('ml_form').querySelectorAll('[data-m]').forEach(e=>o[e.dataset.m]=e.value.trim());return o}
+function mlRead(){const o={};$('ml_form').querySelectorAll('[data-m]').forEach(e=>o[e.dataset.m]=e.isContentEditable?rtClean(e.innerHTML).trim():e.value.trim());return o}
 function mlUpd(){
   const m=mlRead(),n=MLREQ.filter(k=>m[k]).length;
   $('ml_cnt').textContent=n+' dari '+MLREQ.length+' kolom terisi';
   $('ml_prev').innerHTML=mlComplete(m)?'<div style="max-width:400px;margin:0 auto">'+mlHTML(m,true)+'</div>':'<div class="cnt">Preview muncul setelah semua kolom terisi. Posisi logo diatur di preview.</div>';
 }
-let revMode=false,revId=null,revOpen=null;
+let revMode=false,revId=null,revOpen=null,actOpen=null;
 function revDocs(it){
   if(!it.rev){const d=docsOf(it),pick=n=>{const x=d.find(z=>z.n===n);return x?JSON.parse(JSON.stringify(x)):{id:uid(),n:n,s:0}};it.rev={docs:[pick(RML),pick(RL)]}}
   return it.rev.docs;
@@ -947,7 +1044,7 @@ function revEnd(){revMode=false;revId=null;save();render4()}
 function openML(id){
   const it=curIt(),x=it&&it.docs.find(z=>z.id===id);if(!x)return;
   mlId=id;const m=Object.assign(mlDef(it),x.ml||{});
-  $('ml_form').innerHTML=MLF.map(f=>f[2]==='ta'?'<div style="grid-column:1/-1"><label>'+f[1]+'</label><textarea rows="2" data-m="'+f[0]+'">'+esc(m[f[0]]||'')+'</textarea></div>':'<div><label>'+f[1]+'</label><input data-m="'+f[0]+'" value="'+esc(m[f[0]]||'')+'"></div>').join('');
+  $('ml_form').innerHTML=MLF.map(f=>f[0]==='kp'?'<div style="grid-column:1/-1"><label>'+f[1]+'</label>'+rtEd(m.kp,'data-m="kp"')+'</div>':f[2]==='ta'?'<div style="grid-column:1/-1"><label>'+f[1]+'</label><textarea rows="2" data-m="'+f[0]+'">'+esc(m[f[0]]||'')+'</textarea></div>':'<div><label>'+f[1]+'</label><input data-m="'+f[0]+'" value="'+esc(m[f[0]]||'')+'"></div>').join('');
   $('ml_title').textContent=x.n+' \u2014 '+it.nama;logoUI();mlUpd();$('mo3').style.display='flex';
 }
 function closeML(){$('mo3').style.display='none';mlId=null;if(revMode){if(lbId)lbRender();else revEnd()}else{render2();if(lbId)lbRender()}}
@@ -1033,10 +1130,24 @@ document.addEventListener('pointerup',dragEnd);document.addEventListener('pointe
 $('lb_close').onclick=closeLB;
 $('mo4').onclick=e=>{if(e.target.id==='mo4')closeLB()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('mo3').style.display!=='none')closeML();else if($('mo4').style.display!=='none')closeLB()}});
+
+function CO(){return LOGO.co||{}}
+function coSet(k,v){LOGO.co=Object.assign({},LOGO.co,{[k]:v});saveLogo()}
+function render7(){
+  const c=CO();
+  $('l7').innerHTML='<div class="mg" style="max-width:900px"><div><label for="co_n">Nama PT</label><input id="co_n" data-co="nm" value="'+esc(c.nm||'')+'" placeholder="mis. PT Contoh Abadi"></div>'
+   +'<div><label for="co_a">Alamat</label><textarea id="co_a" data-co="al" rows="3">'+esc(c.al||'')+'</textarea></div></div>'
+   +'<div style="margin-top:14px"><label>Barcode PT</label><div class="row" style="margin:0;gap:12px;align-items:flex-start"><label style="margin:0;cursor:pointer;display:flex;align-items:center;justify-content:center;width:150px;height:120px;border:1px dashed var(--bd);border-radius:8px;background:#fff;color:var(--ac);text-align:center;font-size:13px;overflow:hidden" title="Klik untuk unggah barcode">'
+   +(c.bc?'<img src="'+c.bc+'" alt="Barcode PT" style="width:100%;height:100%;object-fit:contain">':'Klik untuk<br>unggah barcode')+'<input type="file" accept="image/*" data-cob="1" hidden></label>'
+   +'<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><span class="cnt">'+(c.bc?'Klik gambar untuk mengganti.':'Belum ada barcode.')+'</span>'+(c.bc?'<button class="d" data-cod="1">Hapus barcode</button>':'')+'</div></div></div>';
+}
+$('l7').addEventListener('input',e=>{const k=e.target.dataset.co;if(k)coSet(k,e.target.value)});
+$('l7').addEventListener('change',e=>{const t=e.target;if(t.dataset.cob){const f=t.files[0];if(!f)return;imgScale(f,600).then(d=>{coSet('bc',d);render7()}).catch(()=>alert('Gambar tidak dapat dibaca. Gunakan file PNG atau JPG.'))}});
+$('l7').addEventListener('click',e=>{if(e.target.dataset.cod&&confirm('Hapus barcode PT?')){coSet('bc','');render7()}});
 function go(t){
-  ['1','2','3','4','5','6'].forEach(n=>$('v'+n).style.display=n==t?'':'none');
+  ['1','2','3','4','5','6','7'].forEach(n=>$('v'+n).style.display=n==t?'':'none');
   document.querySelectorAll('.tab[data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t==t));
-  if(t==2)render2();else if(t==3)renderP();else if(t==4)render3();else if(t==5)render4();else if(t==6)render5();else render();
+  if(t==2)render2();else if(t==3)renderP();else if(t==4)render3();else if(t==5)render4();else if(t==6)render5();else if(t==7)render7();else render();
 }
 document.querySelector('.tabs').onclick=e=>{const t=e.target.dataset.t;if(t)go(t)};
 load();render();initCloud();
