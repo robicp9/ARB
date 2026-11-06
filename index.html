@@ -121,6 +121,12 @@ textarea:focus{outline:2px solid var(--ac)}
 .subtabs{display:flex;gap:6px;margin-bottom:12px}
 .dt td{background:var(--bg)}
 .dt .mg{margin:2px 0 6px}
+.uw{display:flex;gap:8px;align-items:flex-start}
+.cp2{display:flex;gap:2px;flex:none;margin-top:1px}
+.cp2 button{padding:0 3px;border:1px solid transparent;background:none;font-size:14px;line-height:20px;opacity:.35;cursor:pointer}
+.cp2 button.on{opacity:1;border-color:var(--bd);border-radius:6px;background:var(--card)}
+.lkb{display:flex;gap:6px;align-items:center}
+.lkb input{min-width:190px}
 </style>
 </head>
 <body>
@@ -132,6 +138,8 @@ textarea:focus{outline:2px solid var(--ac)}
     <div class="tab" data-t="2">2. Kelengkapan Dokumen</div>
     <div class="tab" data-t="3">3. Proses Pabrik</div>
     <div class="tab" data-t="4">4. Proses NIE</div>
+    <div class="tab" data-t="5">5. Proses Pendaftaran</div>
+    <div class="tab" data-t="6">6. Label BPOM</div>
   </div>
   <div id="v1">
   <div class="subtabs"><div class="tab on" data-sb="d" id="sbd">Daftar</div><div class="tab" data-sb="p" id="sbp">Proses</div></div>
@@ -165,14 +173,15 @@ textarea:focus{outline:2px solid var(--ac)}
   </div>
 
   <div id="v4" style="display:none">
-    <div class="card"><label for="sel3">Pilih Barang</label><select id="sel3"></select></div>
-    <div id="fbody"></div>
-    <div class="card">
-      <b>Daftar Pengajuan NIE</b>
-      <div class="tw" style="margin-top:10px">
-        <table id="t3"><thead><tr><th>Nomor Pengajuan</th><th>Produsen</th><th>Produk</th></tr></thead><tbody id="tb3"></tbody></table>
-      </div>
-    </div>
+    <div class="card"><div class="row" style="margin-top:0"><b>List Barang</b><span class="cnt" id="c4"></span></div><div class="cnt" style="margin-top:6px">Hanya barang dengan kelengkapan data minimal 90% dan proses pabrik Siap + Disetujui.</div><div id="l4" style="margin-top:8px"></div></div>
+  </div>
+
+  <div id="v5" style="display:none">
+    <div class="card"><div class="row" style="margin-top:0"><b>List Barang</b><span class="cnt" id="c5"></span></div><div class="cnt" style="margin-top:6px">Barang yang sudah di-submit dari tab Proses NIE.</div><div id="l5" style="margin-top:8px"></div></div>
+  </div>
+
+  <div id="v6" style="display:none">
+    <div class="card"><div class="row" style="margin-top:0"><b>Label BPOM</b><span class="cnt" id="c6"></span></div><div id="l6" style="margin-top:8px"></div></div>
   </div>
 </div>
 
@@ -217,6 +226,12 @@ textarea:focus{outline:2px solid var(--ac)}
   <h2 id="lb_title">Rancangan Label</h2>
   <div id="lb_body"></div>
   <div class="row"><button id="lb_close">Tutup</button></div>
+</div></div>
+
+<div id="mo5" class="mo" style="display:none"><div class="md wide" role="dialog" aria-modal="true" aria-labelledby="m5_t">
+  <h2 id="m5_t">Detail</h2>
+  <div id="m5_b"></div>
+  <div class="row"><button id="m5_close">Tutup</button></div>
 </div></div>
 
 <div id="mo_auth" class="mo" style="display:none"><div class="md" style="max-width:380px" role="dialog" aria-modal="true" aria-labelledby="au_t">
@@ -438,11 +453,11 @@ function render2(){
   }
   L.style.display='none';B.style.display='';
   const d=docsOf(it),p=pct(it),ada=d.filter(x=>x.s>0).length;
-  const row=x=>'<tr'+(x.s===0?' class="mu"':'')+'><td><div class="un'+nameAttr(x)+'">'+esc(x.n)+'</div>'+(x.en||x.ea?'<div class="fnm">'+esc(x.ent||'')+': '+esc(x.en||'-')+(x.ea?' \u2014 '+esc(x.ea):'')+'</div>':'')+'<div class="fnm">'+esc(x.fn||'')+'</div></td>'
+  const row=x=>'<tr'+(x.s===0?' class="mu"':'')+'><td><div class="uw"><div class="cp2"><button type="button" data-cl="'+x.id+':r" class="'+(x.c==='r'?'on':'')+'" title="Merah">\ud83d\udd34</button><button type="button" data-cl="'+x.id+':g" class="'+(x.c==='g'?'on':'')+'" title="Hijau">\ud83d\udfe2</button></div><div><div class="un'+nameAttr(x)+'">'+esc(x.n)+'</div>'+(x.en||x.ea?'<div class="fnm">'+esc(x.ent||'')+': '+esc(x.en||'-')+(x.ea?' \u2014 '+esc(x.ea):'')+'</div>':'')+(x.fd?'<div class="fnm">'+esc(x.fn||'')+'</div>':'')+'</div></div></td>'
     +'<td><select data-s="'+x.id+'" class="s'+x.s+'">'+ST.map((t,k)=>'<option value="'+k+'"'+(k===x.s?' selected':'')+'>'+t+'</option>').join('')+'</select></td>'
     +'<td><input type="date" data-tt="'+x.id+'" value="'+esc(x.tt||'')+'"></td>'
     +'<td><input type="date" data-tb="'+x.id+'" value="'+esc(x.tb||'')+'"></td>'
-    +'<td class="fc">'+(x.fd?'<a href="#" data-v="'+x.id+'">View</a> ':'')+'<label class="fl">'+(x.fn?'Ganti':'Unggah')+'<input type="file" data-fi="'+x.id+'" hidden></label>'+(x.fn?' <button class="d" data-rf="'+x.id+'" title="Hapus file">hapus file</button>':'')+' <button class="d" data-x="'+x.id+'" title="Hapus dokumen">\u2715</button></td></tr>';
+    +'<td class="fc"><div class="lkb"><input type="text" data-lk="'+x.id+'" placeholder="Tempel link folder\u2026" value="'+esc(x.lk||'')+'">'+(x.lk?'<a href="'+esc(x.lk)+'" target="_blank" rel="noopener">Buka</a>':'')+'</div>'+(x.fd?'<div style="margin-top:4px"><a href="#" data-v="'+x.id+'">View file lama</a> <button class="d" data-rf="'+x.id+'" title="Hapus file lama">hapus file</button></div>':'')+' <button class="d" data-x="'+x.id+'" title="Hapus dokumen">\u2715</button></td></tr>';
   B.innerHTML='<div class="row" style="margin-top:0;margin-bottom:12px"><button id="back">\u2190 Kembali ke daftar</button></div>'
   +'<div class="card"><b>'+esc(it.nama)+'</b><div class="meta">Principal: '+esc(it.prin||'-')+' \u00b7 Personal: '+esc(it.pic||'-')+'</div><div class="bar"><i style="width:'+p+'%"></i></div><div class="cnt">'+p+'% lengkap \u00b7 '+ada+' dokumen sudah ada \u00b7 '+(d.length-ada)+' belum ada</div></div>'
   +'<div class="card"><div class="tw"><table id="t2"><thead><tr><th>Uraian</th><th>Status</th><th>Tanggal Terbit</th><th>Tanggal Berakhir</th><th>File</th></tr></thead><tbody>'+d.map(row).join('')+'</tbody></table></div></div>'
@@ -464,16 +479,18 @@ $('dbody').onchange=e=>{
   if(t.dataset.s){const x=g(t.dataset.s);if(x){x.s=+t.value;save();render2()}}
   else if(t.dataset.tt){const x=g(t.dataset.tt);if(x){x.tt=t.value;save()}}
   else if(t.dataset.tb){const x=g(t.dataset.tb);if(x){x.tb=t.value;save()}}
-  else if(t.dataset.fi){
-    const x=g(t.dataset.fi),f=t.files[0];if(!x||!f)return;
-    x.fn=f.name;x.fd='';if(x.s===0)x.s=2;
-    if(f.size>10485760){alert('File lebih dari 10 MB: hanya nama file yang dicatat, isi filenya tidak disimpan.');save();render2();return}
-    const r=new FileReader();r.onload=()=>{x.fd=r.result;save();render2()};r.readAsDataURL(f);
+  else if(t.dataset.lk){
+    const x=g(t.dataset.lk);if(!x)return;
+    let v=t.value.trim();if(v&&!/^https?:\/\//i.test(v))v='https://'+v;
+    x.lk=v;if(v&&x.s===0)x.s=2;
+    save();render2();
   }
 };
 $('dbody').onclick=e=>{
   const t=e.target;
   if(t.id==='back'){selId=null;render2();return}
+  const cl=t.closest('[data-cl]');
+  if(cl){const q=cl.dataset.cl.split(':'),it0=items.find(i=>i.id===selId),x0=it0&&it0.docs.find(z=>z.id===q[0]);if(x0){if(x0.c===q[1])delete x0.c;else x0.c=q[1];save();render2()}return}
   const ed=t.closest('[data-ed]');if(ed){openE(ed.dataset.ed);return}
   const mlx=t.closest('[data-ml]');if(mlx){openML(mlx.dataset.ml);return}
   const lbx=t.closest('[data-lb]');if(lbx){openLB(lbx.dataset.lb);return}
@@ -493,45 +510,146 @@ $('dbody').onclick=e=>{
   }
   if(t.id==='ad'){const n=$('nd').value.trim();if(n){it.docs.push({id:uid(),n,s:0});save();render2()}}
 };
-let sel3Id=null;
-function fdt(s){return s?String(s).replace('T',' '):''}
-function tbl3(){
-  const rows=items.filter(i=>i.pengajuan&&i.pengajuan.no).sort((a,b)=>String(b.pengajuan.tgl||'').localeCompare(String(a.pengajuan.tgl||'')));
-  $('tb3').innerHTML=rows.length?rows.map(i=>{
-    const g=i.pengajuan,ab=i.abv&&+i.abv>0?' (Mengandung alkohol +/- '+i.abv+'% v/v)':'';
-    const p=effProd(i).split('\n');
-    return '<tr data-r="'+i.id+'"><td><div class="lk">'+esc(g.no)+'</div><div class="fnm">'+esc(fdt(g.tgl))+'</div></td>'
-    +'<td>'+esc(p[0]||'-')+(p[1]?'<div class="fnm">'+esc(p.slice(1).join(' '))+'</div>':'')+'</td>'
-    +'<td>'+esc(i.nama)+esc(ab)+'<div class="fnm">'+esc(effKem(i))+'</div></td></tr>';
-  }).join(''):'<tr><td colspan="3" class="empty">Belum ada pengajuan. Isi nomor pengajuan pada formulir di atas.</td></tr>';
-}
+function okPab(it){const g=grpOf(it);return ppOf(g)==='Disetujui'&&g.some(i=>sameEnt(i,PA)||sameEnt(i,PB))}
+function eligible(it){return pct(it)>=90&&okPab(it)}
+function bRow(i,ctrl){const p=pct(i);return '<div class="bi" style="cursor:default"><div class="bn"><b>'+esc(i.nama)+'</b><div class="meta">'+esc(i.prin||'-')+' \u00b7 '+esc(i.pab||'-')+'</div></div>'+(ctrl?'<div class="row" style="margin:0;gap:8px;align-items:center">'+ctrl+'</div>':'')+'<div class="bp"><div class="bar"><i style="width:'+p+'%"></i></div><span class="cnt">'+p+'%</span></div></div>'}
 function render3(){
-  const sel=$('sel3');
-  if(!items.length){sel.innerHTML='';$('fbody').innerHTML='<div class="card empty">Tambahkan barang di tahap 1 terlebih dahulu.</div>';tbl3();return}
-  if(!items.some(i=>i.id===sel3Id))sel3Id=items[0].id;
-  sel.innerHTML=items.map(i=>'<option value="'+i.id+'"'+(i.id===sel3Id?' selected':'')+'>'+esc(i.nama)+'</option>').join('');
-  const it=items.find(i=>i.id===sel3Id),g=it.pengajuan||{};
-  const F=(l,k,t,x,v)=>'<div><label>'+l+'</label><input '+(t?'type="'+t+'" ':'')+(x||'')+'data-f="pengajuan.'+k+'" value="'+esc(v!==undefined?v:(g[k]||''))+'"></div>';
-  $('fbody').innerHTML='<div class="card"><b>Pengajuan NIE: '+esc(it.nama)+'</b><div class="grid" style="margin-top:10px">'
-   +F('Nomor Pengajuan','no')+F('Tanggal Pengajuan','tgl','datetime-local')
-   +'<div style="grid-column:1/-1"><label>Produsen (otomatis dari pabrik yang disetujui)</label><textarea rows="3" data-f="pengajuan.prod" placeholder="Terisi otomatis setelah pabrik berstatus Disetujui di tahap Proses Pabrik">'+esc(effProd(it))+'</textarea></div>'
-   +F('Kemasan','kem','','placeholder="mis. Botol kaca ( 700 mL )" ',effKem(it))
-   +'</div><div class="row">'+(it.proses?'<span class="b wip">Sedang diproses</span><button class="d" id="unproc">Batal proses</button>':'<button class="p" id="procp">Proses</button>')+'</div></div>';
-  tbl3();
+  const l=items.filter(i=>!i.reg&&eligible(i));
+  $('c4').textContent=l.length+' barang';
+  $('l4').innerHTML=l.length?l.map(i=>{const ok=i.spb&&i.spb.fd;
+    return bRow(i,(ok?'<a href="#" data-vs="'+i.id+'">'+esc(i.spb.fn||'SPB.pdf')+'</a><button class="d" data-rs="'+i.id+'" title="Hapus SPB">hapus</button>':'')+'<label class="fl">'+(ok?'Ganti SPB':'Unggah SPB (pdf)')+'<input type="file" accept="application/pdf,.pdf" data-spb="'+i.id+'" hidden></label>'+(ok?'<button class="p" data-sub="'+i.id+'">Submit</button>':''))}).join(''):'<div class="empty">Belum ada barang yang memenuhi syarat (data \u2265 90% dan pabrik Siap + Disetujui).</div>';
 }
-$('sel3').onchange=e=>{sel3Id=e.target.value;render3()};
-$('fbody').onchange=e=>{
-  const f=e.target.dataset.f,it=items.find(i=>i.id===sel3Id);if(!f||!it)return;
-  const k=f.split('.');if(k[0]!=='pengajuan')return;
-  it.pengajuan=it.pengajuan||{};it.pengajuan[k[1]]=e.target.value;save();tbl3();
+const BLN={januari:1,jan:1,februari:2,feb:2,february:2,maret:3,mar:3,march:3,april:4,apr:4,mei:5,may:5,juni:6,jun:6,june:6,juli:7,jul:7,july:7,agustus:8,agu:8,aug:8,august:8,september:9,sep:9,sept:9,oktober:10,okt:10,oct:10,october:10,november:11,nov:11,nop:11,desember:12,des:12,dec:12,december:12};
+function parseNie(raw){
+  const t=String(raw||'').replace(/\s+/g,' ');
+  let no='';
+  const m=t.match(/\b(M[DL])\s*[-.]?\s*(\d{9,15})\b/i);
+  if(m)no=m[1].toUpperCase()+' '+m[2];
+  else{const k=t.match(/nomor\s*izin\s*edar\s*[:\-]?\s*([A-Z]{2,3}[A-Z0-9 \/.\-]{6,24})/i);if(k)no=k[1].trim()}
+  const ds=[];
+  const iso=(d,mo,y)=>{d=+d;mo=+mo;y=+y;if(y<100)y+=2000;if(mo<1||mo>12||d<1||d>31||y<2000||y>2100)return '';return y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0')};
+  let r,re=/\b(\d{1,2})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{4})\b/g;
+  while((r=re.exec(t))){const v=iso(r[1],r[2],r[3]);if(v)ds.push({i:r.index,v})}
+  re=/\b(\d{1,2})\s+([A-Za-z]{3,9})\.?,?\s+(\d{4})\b/g;
+  while((r=re.exec(t))){const mo=BLN[r[2].toLowerCase()];if(mo){const v=iso(r[1],mo,r[3]);if(v)ds.push({i:r.index,v})}}
+  let exp='';
+  const kw=/(berlaku\s*(?:s\.?\s?d\.?|sampai|hingga|until)|masa\s*berlaku|valid\s*(?:until|to|thru)|expir\w*|kadaluarsa|kedaluwarsa)/ig;
+  let km;
+  while((km=kw.exec(t))&&!exp){const e=km.index+km[0].length;const c=ds.filter(d=>d.i>=e-5&&d.i<=e+80).sort((a,b)=>a.i-b.i)[0];if(c)exp=c.v}
+  if(!exp&&ds.length)exp=ds.map(d=>d.v).sort().pop();
+  return {no,exp};
+}
+
+function loadScript(u){return new Promise((res,rej)=>{if(document.querySelector('script[src="'+u+'"]'))return res();const e=document.createElement('script');e.src=u;e.onload=res;e.onerror=rej;document.head.appendChild(e)})}
+const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',PDFW='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',TESS='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+async function ocr(src){await loadScript(TESS);const r=await Tesseract.recognize(src,'eng');return r.data.text||''}
+async function readNieText(f){
+  if(f.type==='application/pdf'||/\.pdf$/i.test(f.name)){
+    await loadScript(PDFJS);pdfjsLib.GlobalWorkerOptions.workerSrc=PDFW;
+    const doc=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;
+    let t='';for(let n=1;n<=Math.min(doc.numPages,5);n++){const pg=await doc.getPage(n),c=await pg.getTextContent();t+=' '+c.items.map(x=>x.str).join(' ')}
+    if(t.replace(/\s/g,'').length>=20)return t;
+    const pg=await doc.getPage(1),vp=pg.getViewport({scale:2.2}),cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;
+    await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+    return await ocr(cv.toDataURL('image/png'));
+  }
+  return await ocr(f);
+}
+function openDU(du,fn){const w=window.open('','_blank');getBlob(du).then(b=>{const u=URL.createObjectURL(b);if(w){w.location=u}else{const a=document.createElement('a');a.href=u;a.download=fn||'file';document.body.appendChild(a);a.click();a.remove()}}).catch(()=>{if(w)w.close();alert('Gagal membuka file. Periksa koneksi internet.')})}
+const nMsg={};
+function dr(it){it.reg=it.reg||{};return it.reg.d=it.reg.d||{}}
+$('l5').onclick=e=>{
+  const d=e.target.dataset;
+  if(d.nv){e.preventDefault();const it=items.find(i=>i.id===d.nv),x=it&&it.reg&&it.reg.d;if(x&&x.fd)openDU(x.fd,x.fn);return}
+  if(d.nd){const it=items.find(i=>i.id===d.nd);if(it){const x=dr(it);x.fn='';x.fd='';save();render4()}return}
+  if(d.ns){
+    const it=items.find(i=>i.id===d.ns);if(!it)return;const x=dr(it);
+    if(!x.no||!x.exp||!x.fd){alert('Lengkapi dulu: nomor NIE, masa berlaku, dan file NIE.');return}
+    if(!confirm('Simpan NIE \u201c'+it.nama+'\u201d dan pindahkan ke Label BPOM?'))return;
+    it.nie={no:x.no,exp:x.exp,fn:x.fn,fd:x.fd,tgl:new Date().toISOString()};delete it.reg.d;save();render4();return}
+  const id=d.rv||d.rm||d.rl;if(!id)return;e.preventDefault();
+  const it=items.find(i=>i.id===id);if(!it)return;
+  if(d.rv){revOpen=revOpen===id?null:id;render4();return}
+  revMode=true;revId=id;
+  const docs=revDocs(it);
+  if(d.rm)openML(docs.find(z=>z.n===RML).id);else openLB(docs.find(z=>z.n===RL).id);
 };
-$('fbody').onclick=e=>{
-  const id=e.target.id;if(id!=='procp'&&id!=='unproc')return;
-  const it=items.find(i=>i.id===sel3Id);if(!it)return;
-  if(id==='procp')it.proses=true;else delete it.proses;
-  save();render3();
+$('l5').onchange=e=>{
+  const t=e.target,d=t.dataset;
+  const id=d.nn||d.nx||d.nf;if(!id)return;
+  const it=items.find(i=>i.id===id);if(!it)return;const x=dr(it);
+  if(d.nn){x.no=t.value.trim();save();return}
+  if(d.nx){x.exp=t.value;save();return}
+  const f=t.files[0];if(!f)return;
+  const okT=f.type==='application/pdf'||/^image\//.test(f.type)||/\.(pdf|jpe?g|png|webp)$/i.test(f.name);
+  if(!okT){alert('NIE harus berupa PDF atau gambar (JPG/PNG).');t.value='';return}
+  if(f.size>10485760){alert('File lebih dari 10 MB. Perkecil dulu file NIE.');t.value='';return}
+  nMsg[id]='Membaca file NIE\u2026';
+  const r=new FileReader();r.onload=()=>{
+    const isP=f.type==='application/pdf'||/\.pdf$/i.test(f.name);
+    x.fn=f.name;x.fd=isP?r.result.replace(/^data:[^;,]*/,'data:application/pdf'):r.result;save();render4();
+    readNieText(f).then(tx=>{
+      const o=parseNie(tx),got=[];
+      if(o.no){x.no=o.no;got.push('nomor')}
+      if(o.exp){x.exp=o.exp;got.push('masa berlaku')}
+      nMsg[id]=got.length?'Terisi otomatis: '+got.join(' & ')+'. Periksa kembali sebelum Simpan.':'Tidak berhasil membaca nomor/tanggal dari file. Isi manual.';
+      save();render4();
+    }).catch(()=>{nMsg[id]='Gagal membaca file otomatis (perlu internet). Isi manual.';render4()});
+  };r.readAsDataURL(f);
 };
-$('tb3').onclick=e=>{const r=e.target.closest('tr');if(r&&r.dataset.r){sel3Id=r.dataset.r;render3();window.scrollTo(0,0)}};
+function render4(){
+  const l=items.filter(i=>i.reg&&!i.nie);
+  $('c5').textContent=l.length+' barang';
+  $('l5').innerHTML=l.length?l.map(i=>{
+    const x=(i.reg&&i.reg.d)||{};
+    const sub='<div class="row" style="margin:0 8px 12px;gap:8px;align-items:center;flex-wrap:wrap;padding-left:8px"><label class="cnt" style="margin:0">Nomor NIE <input data-nn="'+i.id+'" value="'+esc(x.no||'')+'" placeholder="mis. ML 536021012345" style="min-width:190px"></label><label class="cnt" style="margin:0">Masa berlaku <input type="date" data-nx="'+i.id+'" value="'+esc(x.exp||'')+'"></label><label class="fl">'+(x.fd?'Ganti NIE':'Unggah NIE')+'<input type="file" accept="application/pdf,image/*" data-nf="'+i.id+'" hidden></label>'+(x.fd?'<a href="#" data-nv="'+i.id+'">'+esc(x.fn||'NIE')+'</a><button class="d" data-nd="'+i.id+'">hapus</button>':'')+'<button class="p" data-ns="'+i.id+'">Simpan</button>'+(nMsg[i.id]?'<span class="cnt">'+esc(nMsg[i.id])+'</span>':'')+'</div>';
+    return '<div>'+bRow(i,'<a href="#" data-rv="'+i.id+'">Revisi rancangan</a>'+(revOpen===i.id?'<button data-rm="'+i.id+'">Rancangan ML BPOM</button><button data-rl="'+i.id+'">Rancangan Label</button>':''))+sub+'</div>'}).join(''):'<div class="empty">Belum ada barang di Proses Pendaftaran.</div>';
+}
+function render5(){
+  const l=items.filter(i=>i.nie);
+  $('c6').textContent=l.length+' barang';
+  $('l6').innerHTML=l.length?l.map(i=>'<div class="bi" style="cursor:default"><div class="bn"><b><a href="#" data-n6="'+i.id+'">'+esc(i.nama)+'</a></b> &nbsp;<a href="#" data-l6="'+i.id+'">Label</a><div class="meta">NIE '+esc(i.nie.no)+' \u00b7 berlaku s.d. '+esc(i.nie.exp)+'</div></div></div>').join(''):'<div class="empty">Belum ada barang dengan NIE tersimpan.</div>';
+}
+function mlOfReg(it){const pick=a=>a&&a.find(z=>z.n===RML),x=pick(it.rev&&it.rev.docs)||pick(docsOf(it));return Object.assign(mlDef(it),(x&&x.ml)||{})}
+function closeM5(){$('mo5').style.display='none';$('m5_b').innerHTML=''}
+$('m5_close').onclick=closeM5;
+$('mo5').onclick=e=>{if(e.target.id==='mo5')closeM5()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('mo5').style.display!=='none')closeM5()});
+$('l6').onclick=e=>{
+  const d=e.target.dataset,id=d.n6||d.l6;if(!id)return;e.preventDefault();
+  const it=items.find(i=>i.id===id);if(!it||!it.nie)return;
+  const B=$('m5_b');
+  if(d.l6){
+    $('m5_t').textContent='Rancangan ML BPOM \u2014 '+it.nama;
+    B.innerHTML='<div style="max-width:400px;margin:0 auto">'+mlHTML(mlOfReg(it),false)+'</div>';
+    $('mo5').style.display='flex';return;
+  }
+  const n=it.nie;
+  $('m5_t').textContent='NIE \u2014 '+it.nama;
+  B.innerHTML='<div class="card" style="margin:0 0 10px"><div><b>Nomor NIE:</b> '+esc(n.no)+'</div><div><b>Masa berlaku:</b> '+esc(n.exp)+'</div><div class="fnm">'+esc(n.fn||'')+'</div></div><div id="m5_f" class="cnt">Memuat file\u2026</div>';
+  $('mo5').style.display='flex';
+  getBlob(n.fd).then(b=>{
+    const f=$('m5_f');if(!f||$('mo5').style.display==='none')return;
+    const u=URL.createObjectURL(b);
+    f.className='';
+    f.innerHTML=/^image\//.test(b.type)?'<img src="'+u+'" alt="NIE" style="max-width:100%;border-radius:8px">':'<iframe src="'+u+'" style="width:100%;height:70vh;border:1px solid var(--bd);border-radius:8px"></iframe>';
+    f.insertAdjacentHTML('beforeend','<div class="row"><button id="m5_open">Buka di tab baru</button></div>');
+    $('m5_open').onclick=()=>openDU(n.fd,n.fn);
+  }).catch(()=>{const f=$('m5_f');if(f)f.textContent='Gagal memuat file NIE. Periksa koneksi internet.'});
+};
+$('l4').onchange=e=>{
+  const t=e.target,id=t.dataset.spb;if(!id)return;
+  const it=items.find(i=>i.id===id),f=t.files[0];if(!it||!f)return;
+  if(f.type!=='application/pdf'&&!/\.pdf$/i.test(f.name)){alert('SPB harus berformat PDF.');t.value='';return}
+  if(f.size>10485760){alert('File lebih dari 10 MB. Perkecil dulu file SPB.');t.value='';return}
+  const r=new FileReader();r.onload=()=>{it.spb={fn:f.name,fd:r.result.replace(/^data:[^;,]*/,'data:application/pdf')};save();render3()};r.readAsDataURL(f);
+};
+$('l4').onclick=e=>{
+  const t=e.target,d=t.dataset;
+  if(d.vs){e.preventDefault();const it=items.find(i=>i.id===d.vs);if(it&&it.spb&&it.spb.fd){const w=window.open('','_blank');getBlob(it.spb.fd).then(b=>{const u=URL.createObjectURL(b);if(w){w.location=u}else{const a=document.createElement('a');a.href=u;a.download=it.spb.fn||'SPB.pdf';document.body.appendChild(a);a.click();a.remove()}}).catch(()=>{if(w)w.close();alert('Gagal membuka file. Periksa koneksi internet.')})}}
+  if(d.rs){const it=items.find(i=>i.id===d.rs);if(it&&confirm('Hapus SPB '+(it.spb&&it.spb.fn||'')+'?')){delete it.spb;save();render3()}}
+  if(d.sub){const it=items.find(i=>i.id===d.sub);if(it&&it.spb&&it.spb.fd&&confirm('Submit \u201c'+it.nama+'\u201d ke Proses Pendaftaran?')){it.reg={tgl:new Date().toISOString()};save();render3()}}
+};
 const PA=['LOA / Surat Penunjukan','CFS / Health Certificate','NKV, HACCP, ISO'];
 const PB=['LOE / Surat Pernyataan','CFS / Health Certificate','NKV, HACCP, ISO'];
 const NKV='NKV, HACCP, ISO';
@@ -648,16 +766,26 @@ function mlUpd(){
   $('ml_cnt').textContent=n+' dari '+MLREQ.length+' kolom terisi';
   $('ml_prev').innerHTML=mlComplete(m)?'<div style="max-width:400px;margin:0 auto">'+mlHTML(m,true)+'</div>':'<div class="cnt">Preview muncul setelah semua kolom terisi. Posisi logo diatur di preview.</div>';
 }
+let revMode=false,revId=null,revOpen=null;
+function revDocs(it){
+  if(!it.rev){const d=docsOf(it),pick=n=>{const x=d.find(z=>z.n===n);return x?JSON.parse(JSON.stringify(x)):{id:uid(),n:n,s:0}};it.rev={docs:[pick(RML),pick(RL)]}}
+  return it.rev.docs;
+}
+function curIt(){
+  const it=items.find(i=>i.id===(revMode?revId:selId));
+  return(it&&revMode)?Object.assign({},it,{docs:revDocs(it)}):it;
+}
+function revEnd(){revMode=false;revId=null;save();render4()}
 function openML(id){
-  const it=items.find(i=>i.id===selId),x=it&&it.docs.find(z=>z.id===id);if(!x)return;
+  const it=curIt(),x=it&&it.docs.find(z=>z.id===id);if(!x)return;
   mlId=id;const m=Object.assign(mlDef(it),x.ml||{});
   $('ml_form').innerHTML=MLF.map(f=>f[2]==='ta'?'<div style="grid-column:1/-1"><label>'+f[1]+'</label><textarea rows="2" data-m="'+f[0]+'">'+esc(m[f[0]]||'')+'</textarea></div>':'<div><label>'+f[1]+'</label><input data-m="'+f[0]+'" value="'+esc(m[f[0]]||'')+'"></div>').join('');
   $('ml_title').textContent=x.n+' \u2014 '+it.nama;logoUI();mlUpd();$('mo3').style.display='flex';
 }
-function closeML(){$('mo3').style.display='none';mlId=null;render2();if(lbId)lbRender()}
+function closeML(){$('mo3').style.display='none';mlId=null;if(revMode){if(lbId)lbRender();else revEnd()}else{render2();if(lbId)lbRender()}}
 $('ml_form').addEventListener('input',mlUpd);
-$('ml_save').onclick=()=>{const it=items.find(i=>i.id===selId),x=it&&it.docs.find(z=>z.id===mlId);if(x){const m=mlRead();m.alk=m.alk.replace(',','.');x.ml=m;x.s=mlComplete(m)?2:1;save()}closeML()};
-$('ml_clear').onclick=()=>{const it=items.find(i=>i.id===selId),x=it&&it.docs.find(z=>z.id===mlId);if(x){delete x.ml;x.s=0;save()}closeML()};
+$('ml_save').onclick=()=>{const it=curIt(),x=it&&it.docs.find(z=>z.id===mlId);if(x){const m=mlRead();m.alk=m.alk.replace(',','.');x.ml=m;x.s=mlComplete(m)?2:1;save()}closeML()};
+$('ml_clear').onclick=()=>{const it=curIt(),x=it&&it.docs.find(z=>z.id===mlId);if(x){delete x.ml;x.s=0;save()}closeML()};
 $('ml_cancel').onclick=closeML;
 $('mo3').onclick=e=>{if(e.target.id==='mo3')closeML()};
 
@@ -687,7 +815,7 @@ function compHTML(lb,m,ed){
 }
 const LBK=[['sil','Siluet Botol'],['dep','Label Depan'],['bel','Label Belakang']];
 function lbRender(){
-  const it=items.find(i=>i.id===selId),x=it&&it.docs.find(z=>z.id===lbId);if(!x)return;
+  const it=curIt(),x=it&&it.docs.find(z=>z.id===lbId);if(!x)return;
   const lb=x.lb||{},md=mlDoc(it),mok=!!(md&&mlComplete(md.ml));
   if(lb.sil&&!lb.ar&&typeof Image!=='undefined'){const im=new Image();im.onload=()=>{lb.ar=im.width/im.height;save();if(lbId===x.id)lbRender()};im.onerror=()=>{lb.ar=0.62;save()};im.src=lb.sil}
   const rows=LBK.map(([k,t])=>'<div class="lbr"><div class="lbth">'+(lb[k]?'<img src="'+lb[k]+'" alt="">':'')+'</div><div class="bn"><b>'+t+'</b><div class="fnm">'+(lb[k]?'Sudah diunggah':'Belum diunggah')+'</div></div><label class="fl">'+(lb[k]?'Ganti':'Unggah')+'<input type="file" accept="image/*" data-up="'+k+'" hidden></label>'+(lb[k]?'<button class="d" data-del="'+k+'">hapus</button>':'')+'</div>').join('')
@@ -697,16 +825,16 @@ function lbRender(){
   $('lb_body').innerHTML=rows+'<div style="margin-top:14px">'+(miss.length?'<div class="cnt">Preview muncul setelah semua terpenuhi. Kurang: '+esc(miss.join(', '))+'.</div>':'<div class="row" style="margin:0 0 10px"><button data-edt="1">Atur posisi: '+(lbEdit?'Aktif':'Nonaktif')+'</button><button data-rst="1">Reset posisi</button><span class="cnt">Seret untuk memindah \u00b7 tarik kotak hijau di pojok untuk mengubah ukuran</span></div>'+compHTML(lb,md.ml,lbEdit))+'</div>';
 }
 function lbStatus(x,it){const lb=x.lb||{},md=mlDoc(it),ok=lb.sil&&lb.dep&&lb.bel&&md&&mlComplete(md.ml);if(ok)x.s=2;else if(lb.sil||lb.dep||lb.bel)x.s=1;else x.s=0}
-function openLB(id){const it=items.find(i=>i.id===selId),x=it&&it.docs.find(z=>z.id===id);if(!x)return;lbId=id;$('lb_title').textContent=x.n+' \u2014 '+it.nama;const show=()=>{lbRender();$('mo4').style.display='flex'};if(x.lb&&any(x.lb,isRef)){if(!sb){alert('Gambar tersimpan di cloud dan belum bisa dimuat.');return}setSyn('Memuat gambar…');hydrate(x.lb).then(()=>{synOk();show()}).catch(()=>{setSyn('Gagal memuat gambar. Periksa koneksi internet.',true)})}else show()}
-function closeLB(){$('mo4').style.display='none';lbId=null;render2()}
+function openLB(id){const it=curIt(),x=it&&it.docs.find(z=>z.id===id);if(!x)return;lbId=id;$('lb_title').textContent=x.n+' \u2014 '+it.nama;const show=()=>{lbRender();$('mo4').style.display='flex'};if(x.lb&&any(x.lb,isRef)){if(!sb){alert('Gambar tersimpan di cloud dan belum bisa dimuat.');return}setSyn('Memuat gambar…');hydrate(x.lb).then(()=>{synOk();show()}).catch(()=>{setSyn('Gagal memuat gambar. Periksa koneksi internet.',true)})}else show()}
+function closeLB(){$('mo4').style.display='none';lbId=null;if(revMode)revEnd();else render2()}
 $('lb_body').onchange=e=>{
-  const t=e.target,it=items.find(i=>i.id===selId),x=it&&it.docs.find(z=>z.id===lbId);if(!x)return;
+  const t=e.target,it=curIt(),x=it&&it.docs.find(z=>z.id===lbId);if(!x)return;
   if(t.dataset.up){const f=t.files[0];if(!f)return;
     imgScale(f,900).then(d=>{x.lb=x.lb||{};x.lb[t.dataset.up]=d;if(t.dataset.up==='sil')delete x.lb.ar;lbStatus(x,it);save();lbRender()}).catch(()=>alert('Gambar tidak dapat dibaca. Gunakan file PNG/JPG.'))}
   else if(t.dataset.cat){x.lb=x.lb||{};x.lb.cat=t.value.trim();save();lbRender()}
 };
 $('lb_body').onclick=e=>{
-  const t=e.target,it=items.find(i=>i.id===selId),x=it&&it.docs.find(z=>z.id===lbId);if(!x)return;
+  const t=e.target,it=curIt(),x=it&&it.docs.find(z=>z.id===lbId);if(!x)return;
   if(t.dataset.del){delete x.lb[t.dataset.del];lbStatus(x,it);save();lbRender()}
   if(t.dataset.gml)openML(t.dataset.gml);
   if(t.dataset.edt){lbEdit=!lbEdit;lbRender()}
@@ -716,7 +844,7 @@ const rnd=n=>Math.round(n*10)/10;
 function startDrag(e,el,box,p,done){drag={el,box,mode:e.target.closest('.rz')?'rz':'mv',sx:e.clientX,sy:e.clientY,p:p,cur:Object.assign({},p),done};el.classList.add('on')}
 $('lb_body').addEventListener('pointerdown',e=>{
   const el=e.target.closest('.dr');if(!el)return;
-  const it=items.find(i=>i.id===selId),x=it&&it.docs.find(z=>z.id===lbId);if(!x)return;
+  const it=curIt(),x=it&&it.docs.find(z=>z.id===lbId);if(!x)return;
   e.preventDefault();const k=el.dataset.k;
   startDrag(e,el,el.parentElement.getBoundingClientRect(),posOf(x.lb||{},k),c=>{x.lb=x.lb||{};x.lb.pos=x.lb.pos||{};x.lb.pos[k]={l:rnd(c.l),t:rnd(c.t),w:rnd(c.w)};save()});
 });
@@ -738,9 +866,9 @@ $('lb_close').onclick=closeLB;
 $('mo4').onclick=e=>{if(e.target.id==='mo4')closeLB()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('mo3').style.display!=='none')closeML();else if($('mo4').style.display!=='none')closeLB()}});
 function go(t){
-  ['1','2','3','4'].forEach(n=>$('v'+n).style.display=n==t?'':'none');
+  ['1','2','3','4','5','6'].forEach(n=>$('v'+n).style.display=n==t?'':'none');
   document.querySelectorAll('.tab[data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t==t));
-  if(t==2)render2();else if(t==3)renderP();else if(t==4)render3();else render();
+  if(t==2)render2();else if(t==3)renderP();else if(t==4)render3();else if(t==5)render4();else if(t==6)render5();else render();
 }
 document.querySelector('.tabs').onclick=e=>{const t=e.target.dataset.t;if(t)go(t)};
 load();render();initCloud();
