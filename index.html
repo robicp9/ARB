@@ -137,7 +137,7 @@ textarea:focus{outline:2px solid var(--ac)}
     <div class="tab on" data-t="1">1. Pencatatan Barang</div>
     <div class="tab" data-t="2">2. Kelengkapan Dokumen</div>
     <div class="tab" data-t="3">3. Proses Pabrik</div>
-    <div class="tab" data-t="4">4. Proses NIE</div>
+    <div class="tab" data-t="4">4. Proses SPB</div>
     <div class="tab" data-t="5">5. Proses Pendaftaran</div>
     <div class="tab" data-t="6">6. Label BPOM</div>
   </div>
@@ -173,11 +173,11 @@ textarea:focus{outline:2px solid var(--ac)}
   </div>
 
   <div id="v4" style="display:none">
-    <div class="card"><div class="row" style="margin-top:0"><b>List Barang</b><span class="cnt" id="c4"></span></div><div class="cnt" style="margin-top:6px">Hanya barang dengan kelengkapan data minimal 90% dan proses pabrik Siap + Disetujui.</div><div id="l4" style="margin-top:8px"></div></div>
+    <div class="card"><div class="row" style="margin-top:0"><b>List Barang</b><span class="cnt" id="c4"></span><button class="p" id="ex4" style="margin-left:auto">Export</button></div><div class="cnt" style="margin-top:6px">Hanya barang dengan kelengkapan data minimal 90% dan proses pabrik Siap + Disetujui.</div><div id="l4" style="margin-top:8px"></div></div>
   </div>
 
   <div id="v5" style="display:none">
-    <div class="card"><div class="row" style="margin-top:0"><b>List Barang</b><span class="cnt" id="c5"></span></div><div class="cnt" style="margin-top:6px">Barang yang sudah di-submit dari tab Proses NIE.</div><div id="l5" style="margin-top:8px"></div></div>
+    <div class="card"><div class="row" style="margin-top:0"><b>List Barang</b><span class="cnt" id="c5"></span></div><div class="cnt" style="margin-top:6px">Barang yang sudah di-submit dari tab Proses SPB.</div><div id="l5" style="margin-top:8px"></div></div>
   </div>
 
   <div id="v6" style="display:none">
@@ -659,6 +659,7 @@ function dr(it){it.reg=it.reg||{};return it.reg.d=it.reg.d||{}}
 $('l5').onclick=e=>{
   const d=e.target.dataset;
   if(d.vs){e.preventDefault();const it=items.find(i=>i.id===d.vs);if(it&&it.spb&&it.spb.fd)openDU(it.spb.fd,it.spb.fn);return}
+  if(d.b5){e.preventDefault();const it=items.find(i=>i.id===d.b5);if(it&&confirm('Kembalikan \u201c'+it.nama+'\u201d ke Proses SPB? SPB tetap tersimpan, isian NIE yang belum disimpan dihapus.')){delete it.reg;save();render3();render4();render5()}return}
   if(d.nv){e.preventDefault();const it=items.find(i=>i.id===d.nv),x=it&&it.reg&&it.reg.d;if(x&&x.fd)openDU(x.fd,x.fn);return}
   if(d.nd){const it=items.find(i=>i.id===d.nd);if(it){const x=dr(it);x.fn='';x.fd='';save();render4()}return}
   if(d.ns){
@@ -718,14 +719,14 @@ function render4(){
   $('l5').innerHTML=l.length?'<div class="tw"><table><thead><tr><th>Nomor Pengajuan</th><th>Billing ID</th><th>Produk</th><th>Produsen</th><th>SPB</th><th>Kelengkapan</th></tr></thead><tbody>'+l.map(i=>{
     const x=(i.reg&&i.reg.d)||{};
     const sub='<tr class="dt"><td colspan="6"><div class="row" style="margin:0;gap:8px;align-items:center;flex-wrap:wrap"><label class="cnt" style="margin:0">Nomor NIE <input data-nn="'+i.id+'" value="'+esc(x.no||'')+'" placeholder="mis. ML 536021012345" style="min-width:190px"></label><label class="cnt" style="margin:0">Masa berlaku <input type="date" data-nx="'+i.id+'" value="'+esc(x.exp||'')+'"></label><label class="fl">'+(x.fd?'Ganti NIE':'Unggah NIE')+'<input type="file" accept="application/pdf,image/*" data-nf="'+i.id+'" hidden></label>'+(x.fd?'<a href="#" data-nv="'+i.id+'">'+esc(x.fn||'NIE')+'</a><button class="d" data-nd="'+i.id+'">hapus</button>':'')+'<button class="p" data-ns="'+i.id+'">Simpan</button>'+(nMsg[i.id]?'<span class="cnt">'+esc(nMsg[i.id])+'</span>':'')+'</div>'+labFields(i,x)+'</td></tr>';
-    const rev=' &nbsp;<a href="#" data-rv="'+i.id+'">Revisi rancangan</a>'+(revOpen===i.id?' <button data-rm="'+i.id+'">Rancangan ML BPOM</button> <button data-rl="'+i.id+'">Rancangan Label</button>':'');
+    const rev=' &nbsp;<a href="#" data-rv="'+i.id+'">Revisi rancangan</a> <button class="d" data-b5="'+i.id+'">\u21a9 Kembalikan ke Proses SPB</button>'+(revOpen===i.id?' <button data-rm="'+i.id+'">Rancangan ML BPOM</button> <button data-rl="'+i.id+'">Rancangan Label</button>':'');
     const spb=i.spb&&i.spb.fd?'<div><a href="#" data-vs="'+i.id+'">'+esc(i.spb.fn||'SPB.pdf')+'</a></div>':'';
     return bRow(i,{rev:rev,spb:spb,sub:sub})}).join('')+'</tbody></table></div>':'<div class="empty">Belum ada barang di Proses Pendaftaran.</div>';
 }
 function render5(){
   const l=items.filter(i=>i.nie);
   $('c6').textContent=l.length+' barang';
-  $('l6').innerHTML=l.length?l.map(i=>'<div class="bi" style="cursor:default"><div class="bn"><b><a href="#" data-n6="'+i.id+'">'+esc(itTitle(i))+'</a></b> &nbsp;<a href="#" data-l6="'+i.id+'">Label</a>'+(i.kemasan?'<div class="fnm">'+esc(i.kemasan)+'</div>':'')+'<div class="meta"><a href="#" data-n6="'+i.id+'">NIE '+esc(i.nie.no)+'</a> \u00b7 berlaku s.d. '+fmtD(i.nie.exp)+'</div></div></div>').join(''):'<div class="empty">Belum ada barang dengan NIE tersimpan.</div>';
+  $('l6').innerHTML=l.length?l.map(i=>'<div class="bi" style="cursor:default"><div class="bn"><b><a href="#" data-n6="'+i.id+'">'+esc(itTitle(i))+'</a></b> &nbsp;<a href="#" data-l6="'+i.id+'">Label</a>'+(i.kemasan?'<div class="fnm">'+esc(i.kemasan)+'</div>':'')+' &nbsp;<button class="d" data-b6="'+i.id+'">\u21a9 Kembalikan ke Proses Pendaftaran</button><div class="meta"><a href="#" data-n6="'+i.id+'">NIE '+esc(i.nie.no)+'</a> \u00b7 berlaku s.d. '+fmtD(i.nie.exp)+'</div></div></div>').join(''):'<div class="empty">Belum ada barang dengan NIE tersimpan.</div>';
 }
 function mlOfReg(it){const pick=a=>a&&a.find(z=>z.n===RML),x=pick(it.rev&&it.rev.docs)||pick(docsOf(it));const m=Object.assign(mlDef(it),(x&&x.ml)||{}),L=(it.nie&&it.nie.lab)||{};['nm','sn','ib','nb','dp','di','kp'].forEach(k=>{if(L[k])m[k]=L[k]});return m}
 function closeM5(){$('mo5').style.display='none';$('m5_b').innerHTML=''}
@@ -733,7 +734,9 @@ $('m5_close').onclick=closeM5;
 $('mo5').onclick=e=>{if(e.target.id==='mo5')closeM5()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('mo5').style.display!=='none')closeM5()});
 $('l6').onclick=e=>{
-  const d=e.target.dataset,id=d.n6||d.l6;if(!id)return;e.preventDefault();
+  const d=e.target.dataset;
+  if(d.b6){e.preventDefault();const it=items.find(i=>i.id===d.b6);if(it&&it.nie&&confirm('Kembalikan \u201c'+it.nama+'\u201d ke Proses Pendaftaran? Data NIE & label dikembalikan sebagai isian (belum disimpan).')){const n=it.nie;it.reg=it.reg||{tgl:n.tgl};it.reg.d={no:n.no,exp:n.exp,fn:n.fn,fd:n.fd,lab:n.lab};delete it.nie;save();render3();render4();render5()}return}
+  const id=d.n6||d.l6;if(!id)return;e.preventDefault();
   const it=items.find(i=>i.id===id);if(!it||!it.nie)return;
   const B=$('m5_b');
   if(d.l6){
@@ -754,6 +757,43 @@ $('l6').onclick=e=>{
     $('m5_open').onclick=()=>openDU(n.fd,n.fn);
   }).catch(()=>{const f=$('m5_f');if(f)f.textContent='Gagal memuat file NIE. Periksa koneksi internet.'});
 };
+
+/* ===== Export Payment Request (Tab 4) ===== */
+function terbilang(n){const a=['','ONE','TWO','THREE','FOUR','FIVE','SIX','SEVEN','EIGHT','NINE','TEN','ELEVEN','TWELVE','THIRTEEN','FOURTEEN','FIFTEEN','SIXTEEN','SEVENTEEN','EIGHTEEN','NINETEEN'],b=['','','TWENTY','THIRTY','FORTY','FIFTY','SIXTY','SEVENTY','EIGHTY','NINETY'];
+  const u=x=>{let r='';if(x>=100){r+=a[Math.floor(x/100)]+' HUNDRED';x%=100;if(x)r+=' '}if(x>=20){r+=b[Math.floor(x/10)];if(x%10)r+='-'+a[x%10]}else if(x)r+=a[x];return r};
+  if(!n)return 'ZERO';const g=[[1e9,'BILLION'],[1e6,'MILLION'],[1e3,'THOUSAND'],[1,'']];let o=[];g.forEach(([v,w])=>{const q=Math.floor(n/v);if(q){o.push(u(q)+(w?' '+w:''));n%=v}});return o.join(' ')}
+const rp=n=>(+n||0).toLocaleString('en-US');
+const exList=()=>items.filter(i=>!i.reg&&eligible(i)&&i.spb&&i.spb.fd);
+function exHTML(ed){
+  const l=exList(),tot=l.reduce((a,i)=>a+(+i.spb.jm||0),0),d=new Date(),tg=d.getDate()+' '+['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][d.getMonth()]+' '+d.getFullYear();
+  const th='style="border:1px solid #000;padding:4px 6px;background:#d9d9d9;text-align:center"',td='style="border:1px solid #000;padding:3px 6px"';
+  const rows=l.map((i,k)=>{const sp=i.spb;return '<tr><td '+td+' align="center">'+(k+1)+'</td><td '+td+' align="center">'+esc(sp.ng||'-')+'</td><td '+td+' align="center">'+esc(sp.bid||'-')+'</td><td '+td+'>'+esc(i.nama||'')+'</td><td '+td+'><span style="float:left">Rp</span><span style="float:right">'
+    +(ed?'<input data-ej="'+i.id+'" value="'+(sp.jm||'')+'" inputmode="numeric" style="width:100px;text-align:right">':rp(sp.jm))+'</span></td><td '+td+' align="center">'
+    +(ed?'<input data-es="'+i.id+'" value="'+esc(sp.st||'')+'" list="exst" style="width:70px">':esc(sp.st||''))+'</td></tr>'}).join('');
+  const lg=(typeof LOGO!=='undefined'&&LOGO.src)?'<img src="'+LOGO.src+'" style="height:70px;float:right">':'';
+  return '<div style="font-family:Calibri,Arial,sans-serif;font-size:13px;color:#000;background:#fff;padding:16px">'+lg
+   +'<div style="font-size:20px;font-weight:bold">PAYMENT REQUEST</div><div style="font-size:16px;font-weight:bold">DIVISI : &nbsp;IMPORT</div>'
+   +'<div style="margin:22px 0 6px 28px;font-size:14px"><b>Subject: &nbsp;&nbsp;PRODUK REGISTRASI ML BARU BPOM RBA</b></div>'
+   +'<table style="border-collapse:collapse;width:100%"><thead><tr><th '+th+'>No</th><th '+th+'>No Aju</th><th '+th+'>Billing ID No</th><th '+th+'>Nama Produk</th><th '+th+'>Jumlah</th><th '+th+'>Status</th></tr></thead><tbody>'
+   +(rows||'<tr><td '+td+' colspan="6" align="center">Belum ada barang dengan SPB terunggah.</td></tr>')
+   +'<tr><td '+th+' colspan="4" style="text-align:center"><b>TOTAL</b></td><td '+th+'><b><span style="float:left">Rp</span><span style="float:right">'+rp(tot)+'</span></b></td><td '+th+'></td></tr></tbody></table>'
+   +'<div style="margin:18px 0 0 28px"><span>Say : </span> &nbsp;&nbsp;<b style="letter-spacing:.5px">'+terbilang(tot)+' RUPIAH</b></div>'
+   +'<div style="margin:18px 0 0 28px">Jakarta, '+tg+'</div>'
+   +'<table style="width:100%;margin-top:14px;text-align:left"><tr><td>Purposed by,</td><td>Approved By,</td><td>Checked by,</td><td>Approved by,</td></tr><tr><td style="height:70px"></td></tr><tr style="font-weight:bold"><td>Rudy/ Robi</td><td>Dewi H. F.</td><td>Leni/ John</td><td>Rio Gozal</td></tr></table></div>'}
+function exOpen(){
+  let m=document.getElementById('mo6');
+  if(!m){m=document.createElement('div');m.id='mo6';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;overflow:auto;padding:16px';
+    m.onclick=e=>{const t=e.target,d=t.dataset;
+      if(t===m||d.exx!==undefined)m.style.display='none';
+      else if(d.exp!==undefined){const w=window.open('','_blank');if(w){w.document.write('<title>Payment Request</title>'+exHTML(false));w.document.close();setTimeout(()=>w.print(),400)}}};
+    m.onchange=e=>{const d=e.target.dataset,id=d.ej||d.es,it=items.find(i=>i.id===id);if(!it||!it.spb)return;
+      if(d.ej)it.spb.jm=Math.max(0,parseInt(String(e.target.value).replace(/\D/g,''))||0);else it.spb.st=e.target.value.trim();
+      save();exOpen()};
+    document.body.appendChild(m)}
+  m.innerHTML='<div style="max-width:900px;margin:0 auto"><div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:8px"><span style="color:#fff;margin-right:auto;font-size:12px">Isi Jumlah &amp; Status per barang (tersimpan otomatis).</span><button class="p" data-exp>Cetak / PDF</button><button data-exx>Tutup</button></div><datalist id="exst"><option value="Re-New"><option value="P5"></datalist>'+exHTML(true)+'</div>';
+  m.style.display='block'}
+$('ex4').onclick=exOpen;
+document.addEventListener('keydown',e=>{const m=document.getElementById('mo6');if(e.key==='Escape'&&m&&m.style.display!=='none')m.style.display='none'});
 $('l4').onchange=e=>{
   const t=e.target,sf=t.dataset.sf;
   if(sf){const q=sf.split(':'),it=items.find(i=>i.id===q[1]);if(it&&it.spb){it.spb[q[0]]=t.value.trim();save();render3()}return}
