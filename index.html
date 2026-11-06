@@ -512,12 +512,29 @@ $('dbody').onclick=e=>{
 };
 function okPab(it){const g=grpOf(it);return ppOf(g)==='Disetujui'&&g.some(i=>sameEnt(i,PA)||sameEnt(i,PB))}
 function eligible(it){return pct(it)>=90&&okPab(it)}
-function bRow(i,ctrl){const p=pct(i);return '<div class="bi" style="cursor:default"><div class="bn"><b>'+esc(i.nama)+'</b><div class="meta">'+esc(i.prin||'-')+' \u00b7 '+esc(i.pab||'-')+'</div></div>'+(ctrl?'<div class="row" style="margin:0;gap:8px;align-items:center">'+ctrl+'</div>':'')+'<div class="bp"><div class="bar"><i style="width:'+p+'%"></i></div><span class="cnt">'+p+'%</span></div></div>'}
+function fmtD(v){const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?m[3]+'-'+m[2]+'-'+m[1]:esc(v||'')}
+const sMsg={};
+function bRow(i,o){
+  o=o||{};
+  const p=pct(i),pd=pabDetail(grpOf(i)),pn=pd.n||i.pab||'',pa=pd.a||i.apab||'',sp=i.spb||{};
+  const ab=i.abv&&+i.abv>0?'(Mengandung Alkohol +/- '+i.abv+'% v/v)':'';
+  const head=[[i.jenis,i.njenis].filter(Boolean).join(' - '),ab].filter(Boolean).join(' ');
+  const title=head+(i.nama?(head?' - ':'')+i.nama:'');
+  const fld=(k,ph)=>sp[k]?esc(sp[k]):(o.edit&&sp.fd?'<input data-sf="'+k+':'+i.id+'" placeholder="'+ph+'" style="min-width:150px">':'-');
+  return '<tr><td>'+fld('ng','Nomor pengajuan')+'</td>'
+   +'<td>'+fld('bid','Billing ID')+(sp.bb?'<div class="fnm">'+fmtD(sp.bb)+' 00:00</div>':'')+'</td>'
+   +'<td><b>'+esc(title)+'</b>'+(o.rev||'')+(i.kemasan?'<div class="fnm">'+esc(i.kemasan)+'</div>':'')+'<div class="fnm">'+esc(i.prin||'-')+'</div></td>'
+   +'<td>'+esc(pn||'-')+(pa?'<div class="fnm">'+esc(pa)+'</div>':'')+'</td>'
+   +'<td>'+(sp.no?esc(sp.no):'')+(sp.td?'<div class="fnm">'+fmtD(sp.td)+'</div>':'')+(o.spb||'')+(sMsg[i.id]?'<div class="fnm">'+esc(sMsg[i.id])+'</div>':'')+'</td>'
+   +'<td><div class="bar" style="min-width:90px"><i style="width:'+p+'%"></i></div><span class="cnt">'+p+'%</span></td></tr>'+(o.sub||'');
+}
 function render3(){
   const l=items.filter(i=>!i.reg&&eligible(i));
   $('c4').textContent=l.length+' barang';
-  $('l4').innerHTML=l.length?l.map(i=>{const ok=i.spb&&i.spb.fd;
-    return bRow(i,(ok?'<a href="#" data-vs="'+i.id+'">'+esc(i.spb.fn||'SPB.pdf')+'</a><button class="d" data-rs="'+i.id+'" title="Hapus SPB">hapus</button>':'')+'<label class="fl">'+(ok?'Ganti SPB':'Unggah SPB (pdf)')+'<input type="file" accept="application/pdf,.pdf" data-spb="'+i.id+'" hidden></label>'+(ok?'<button class="p" data-sub="'+i.id+'">Submit</button>':''))}).join(''):'<div class="empty">Belum ada barang yang memenuhi syarat (data \u2265 90% dan pabrik Siap + Disetujui).</div>';
+  $('l4').innerHTML=l.length?'<div class="tw"><table><thead><tr><th>Nomor Pengajuan</th><th>Billing ID</th><th>Produk</th><th>Produsen</th><th>SPB</th><th>Kelengkapan</th></tr></thead><tbody>'+l.map(i=>{const ok=i.spb&&i.spb.fd;
+    const spb='<div style="margin-top:4px">'+(ok?'<a href="#" data-vs="'+i.id+'">'+esc(i.spb.fn||'SPB.pdf')+'</a>':'')+'</div>'
+      +'<div class="row" style="margin:4px 0 0;gap:6px;align-items:center">'+'<label class="fl">'+(ok?'Ganti SPB':'Unggah SPB (pdf)')+'<input type="file" accept="application/pdf,.pdf" data-spb="'+i.id+'" hidden></label>'+(ok?'<button class="d" data-rs="'+i.id+'" title="Hapus SPB">hapus</button><button class="p" data-sub="'+i.id+'">Submit</button>':'')+'</div>';
+    return bRow(i,{spb:spb,edit:true})}).join('')+'</tbody></table></div>':'<div class="empty">Belum ada barang yang memenuhi syarat (data \u2265 90% dan pabrik Siap + Disetujui).</div>';
 }
 const BLN={januari:1,jan:1,februari:2,feb:2,february:2,maret:3,mar:3,march:3,april:4,apr:4,mei:5,may:5,juni:6,jun:6,june:6,juli:7,jul:7,july:7,agustus:8,agu:8,aug:8,august:8,september:9,sep:9,sept:9,oktober:10,okt:10,oct:10,october:10,november:11,nov:11,nop:11,desember:12,des:12,dec:12,december:12};
 function parseNie(raw){
@@ -538,6 +555,25 @@ function parseNie(raw){
   while((km=kw.exec(t))&&!exp){const e=km.index+km[0].length;const c=ds.filter(d=>d.i>=e-5&&d.i<=e+80).sort((a,b)=>a.i-b.i)[0];if(c)exp=c.v}
   if(!exp&&ds.length)exp=ds.map(d=>d.v).sort().pop();
   return {no,exp};
+}
+function parseSpb(raw){
+  const t=String(raw||'').replace(/\s+/g,' ');
+  const o={ng:'',bid:'',no:'',td:'',bb:''};
+  let m=t.match(/nomor\s*pengajuan\s*[:\-]?\s*([A-Z]{3,6}\d{8,})/i)||t.match(/\b([A-Z]{4}\d{12,})\b/);
+  if(m)o.ng=m[1].toUpperCase();
+  m=t.match(/billing\s*id.{0,40}?(\d{12,20})/i);
+  if(m)o.bid=m[1];
+  const mon='(?:'+Object.keys(BLN).join('|')+')';
+  const dre='(\\d{1,2})\\s+('+mon+')\\.?,?\\s+(\\d{4})';
+  const iso=(d,mo,y)=>{mo=BLN[String(mo).toLowerCase()];if(!mo)return '';return y+'-'+String(mo).padStart(2,'0')+'-'+String(+d).padStart(2,'0')};
+  m=t.match(/\b(\d{6}\.\d{3}\.\d\.\d{4}\.\d{4}\.\d)\s*/);
+  let after='';
+  if(m){o.no=m[1];after=t.slice(m.index+m[0].length)}
+  else{m=t.match(/\b(\d{4,8}(?:\.\d+){4,6})\b\s*/);if(m){o.no=m[1];after=t.slice(m.index+m[0].length)}}
+  if(after){const d=after.slice(0,80).match(new RegExp(dre,'i'));if(d)o.td=iso(d[1],d[2],d[3])}
+  m=t.match(new RegExp('sampai\\s*(?:dengan\\s*)?tanggal\\s*'+dre,'i'));
+  if(m)o.bb=iso(m[1],m[2],m[3]);
+  return o;
 }
 
 function loadScript(u){return new Promise((res,rej)=>{if(document.querySelector('script[src="'+u+'"]'))return res();const e=document.createElement('script');e.src=u;e.onload=res;e.onerror=rej;document.head.appendChild(e)})}
@@ -560,6 +596,7 @@ const nMsg={};
 function dr(it){it.reg=it.reg||{};return it.reg.d=it.reg.d||{}}
 $('l5').onclick=e=>{
   const d=e.target.dataset;
+  if(d.vs){e.preventDefault();const it=items.find(i=>i.id===d.vs);if(it&&it.spb&&it.spb.fd)openDU(it.spb.fd,it.spb.fn);return}
   if(d.nv){e.preventDefault();const it=items.find(i=>i.id===d.nv),x=it&&it.reg&&it.reg.d;if(x&&x.fd)openDU(x.fd,x.fn);return}
   if(d.nd){const it=items.find(i=>i.id===d.nd);if(it){const x=dr(it);x.fn='';x.fd='';save();render4()}return}
   if(d.ns){
@@ -600,10 +637,12 @@ $('l5').onchange=e=>{
 function render4(){
   const l=items.filter(i=>i.reg&&!i.nie);
   $('c5').textContent=l.length+' barang';
-  $('l5').innerHTML=l.length?l.map(i=>{
+  $('l5').innerHTML=l.length?'<div class="tw"><table><thead><tr><th>Nomor Pengajuan</th><th>Billing ID</th><th>Produk</th><th>Produsen</th><th>SPB</th><th>Kelengkapan</th></tr></thead><tbody>'+l.map(i=>{
     const x=(i.reg&&i.reg.d)||{};
-    const sub='<div class="row" style="margin:0 8px 12px;gap:8px;align-items:center;flex-wrap:wrap;padding-left:8px"><label class="cnt" style="margin:0">Nomor NIE <input data-nn="'+i.id+'" value="'+esc(x.no||'')+'" placeholder="mis. ML 536021012345" style="min-width:190px"></label><label class="cnt" style="margin:0">Masa berlaku <input type="date" data-nx="'+i.id+'" value="'+esc(x.exp||'')+'"></label><label class="fl">'+(x.fd?'Ganti NIE':'Unggah NIE')+'<input type="file" accept="application/pdf,image/*" data-nf="'+i.id+'" hidden></label>'+(x.fd?'<a href="#" data-nv="'+i.id+'">'+esc(x.fn||'NIE')+'</a><button class="d" data-nd="'+i.id+'">hapus</button>':'')+'<button class="p" data-ns="'+i.id+'">Simpan</button>'+(nMsg[i.id]?'<span class="cnt">'+esc(nMsg[i.id])+'</span>':'')+'</div>';
-    return '<div>'+bRow(i,'<a href="#" data-rv="'+i.id+'">Revisi rancangan</a>'+(revOpen===i.id?'<button data-rm="'+i.id+'">Rancangan ML BPOM</button><button data-rl="'+i.id+'">Rancangan Label</button>':''))+sub+'</div>'}).join(''):'<div class="empty">Belum ada barang di Proses Pendaftaran.</div>';
+    const sub='<tr class="dt"><td colspan="6"><div class="row" style="margin:0;gap:8px;align-items:center;flex-wrap:wrap"><label class="cnt" style="margin:0">Nomor NIE <input data-nn="'+i.id+'" value="'+esc(x.no||'')+'" placeholder="mis. ML 536021012345" style="min-width:190px"></label><label class="cnt" style="margin:0">Masa berlaku <input type="date" data-nx="'+i.id+'" value="'+esc(x.exp||'')+'"></label><label class="fl">'+(x.fd?'Ganti NIE':'Unggah NIE')+'<input type="file" accept="application/pdf,image/*" data-nf="'+i.id+'" hidden></label>'+(x.fd?'<a href="#" data-nv="'+i.id+'">'+esc(x.fn||'NIE')+'</a><button class="d" data-nd="'+i.id+'">hapus</button>':'')+'<button class="p" data-ns="'+i.id+'">Simpan</button>'+(nMsg[i.id]?'<span class="cnt">'+esc(nMsg[i.id])+'</span>':'')+'</div></td></tr>';
+    const rev=' &nbsp;<a href="#" data-rv="'+i.id+'">Revisi rancangan</a>'+(revOpen===i.id?' <button data-rm="'+i.id+'">Rancangan ML BPOM</button> <button data-rl="'+i.id+'">Rancangan Label</button>':'');
+    const spb=i.spb&&i.spb.fd?'<div><a href="#" data-vs="'+i.id+'">'+esc(i.spb.fn||'SPB.pdf')+'</a></div>':'';
+    return bRow(i,{rev:rev,spb:spb,sub:sub})}).join('')+'</tbody></table></div>':'<div class="empty">Belum ada barang di Proses Pendaftaran.</div>';
 }
 function render5(){
   const l=items.filter(i=>i.nie);
@@ -638,11 +677,22 @@ $('l6').onclick=e=>{
   }).catch(()=>{const f=$('m5_f');if(f)f.textContent='Gagal memuat file NIE. Periksa koneksi internet.'});
 };
 $('l4').onchange=e=>{
-  const t=e.target,id=t.dataset.spb;if(!id)return;
+  const t=e.target,sf=t.dataset.sf;
+  if(sf){const q=sf.split(':'),it=items.find(i=>i.id===q[1]);if(it&&it.spb){it.spb[q[0]]=t.value.trim();save();render3()}return}
+  const id=t.dataset.spb;if(!id)return;
   const it=items.find(i=>i.id===id),f=t.files[0];if(!it||!f)return;
   if(f.type!=='application/pdf'&&!/\.pdf$/i.test(f.name)){alert('SPB harus berformat PDF.');t.value='';return}
   if(f.size>10485760){alert('File lebih dari 10 MB. Perkecil dulu file SPB.');t.value='';return}
-  const r=new FileReader();r.onload=()=>{it.spb={fn:f.name,fd:r.result.replace(/^data:[^;,]*/,'data:application/pdf')};save();render3()};r.readAsDataURL(f);
+  const r=new FileReader();r.onload=()=>{
+    it.spb={fn:f.name,tgl:new Date().toISOString().slice(0,10),fd:r.result.replace(/^data:[^;,]*/,'data:application/pdf')};
+    sMsg[id]='Membaca SPB\u2026';save();render3();
+    readNieText(f).then(tx=>{
+      const o=parseSpb(tx),n=['ng','bid','no','td'].filter(k=>o[k]).length;
+      if(it.spb)Object.assign(it.spb,o);
+      sMsg[id]=n===4?'Terisi otomatis dari SPB.':(n?'Sebagian terbaca. Lengkapi yang kosong secara manual.':'Gagal membaca isi SPB. Isi manual.');
+      save();render3();
+    }).catch(()=>{sMsg[id]='Gagal membaca SPB otomatis (perlu internet). Isi manual.';render3()});
+  };r.readAsDataURL(f);
 };
 $('l4').onclick=e=>{
   const t=e.target,d=t.dataset;
