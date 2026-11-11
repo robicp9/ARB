@@ -866,7 +866,7 @@ function fmtD(v){const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return 
 const sMsg={};
 function bRow(i,o){
   o=o||{};
-  const p=pct(i),pd=pabDetail(grpOf(i)),sp=i.spb||{};let pn=pd.n||i.pab||'',pa=pd.a||i.apab||'';if(i.perub){const og=items.find(z=>z.id===i.perubOf),dp=String((og&&og.nie&&og.nie.lab&&og.nie.lab.dp)||'').trim();if(dp){const k=dp.indexOf('\n');pn=k>0?dp.slice(0,k).trim():dp;pa=k>0?dp.slice(k+1).trim():''}}
+  const p=pct(i),pd=pabDetail(grpOf(i)),rd=(i.lg&&i.reg&&i.reg.d)||{},sp=i.spb||(rd.fn&&ngKey(rd.fn)?{ng:ngKey(rd.fn)}:{});let pn=pd.n||i.pab||'',pa=pd.a||i.apab||'';if(!pn&&i.lg){const dq=String((rd.lab&&rd.lab.dp)||'').trim();if(dq){const k=dq.indexOf('\n');pn=k>0?dq.slice(0,k).trim():dq;pa=k>0?dq.slice(k+1).trim():''}}if(i.perub){const og=items.find(z=>z.id===i.perubOf),dp=String((og&&og.nie&&og.nie.lab&&og.nie.lab.dp)||'').trim();if(dp){const k=dp.indexOf('\n');pn=k>0?dp.slice(0,k).trim():dp;pa=k>0?dp.slice(k+1).trim():''}}
   const ab=i.abv&&+i.abv>0?'(Mengandung Alkohol +/- '+i.abv+'% v/v)':'';
   const head=[[i.jenis,i.njenis].filter(Boolean).join(' - '),ab].filter(Boolean).join(' ');
   const title=o.t2?itTitle2(i):head+(i.nama?(head?' - ':'')+i.nama:'');
