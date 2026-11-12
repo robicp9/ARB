@@ -198,7 +198,7 @@ input[type=color]{width:34px;height:26px;padding:0;border:0;background:none;curs
 <body>
 <div class="wrap">
   <h1>Asisten Registrasi BPOM</h1>
-  <p class="sub"><span id="syn">Memuat…</span> <a href="#" id="lout" style="display:none;margin-left:8px">Keluar</a> <span style="margin-left:8px;opacity:.5;font-size:11px">v12nov-b</span></p>
+  <p class="sub"><span id="syn">Memuat…</span> <a href="#" id="lout" style="display:none;margin-left:8px">Keluar</a> <span style="margin-left:8px;opacity:.5;font-size:11px">v12nov-c</span></p>
   <div class="tabs">
     <div class="tab on" data-t="1">1. Pencatatan Barang</div>
     <div class="tab" data-t="2">2. Kelengkapan Dokumen</div>
@@ -1911,7 +1911,7 @@ function mlHTML(m,ed,qr,showBc,noBc){
     const R=(k,a,b)=>'<div class="sr"'+at(k)+'><b class="sl">'+a+' :</b> '+esc(b).replace(/\n/g,'<br>')+'</div>';
     const bg=String(m.bg||'').trim(),showBg=f.bg==='hide'?false:f.bg==='show'?!!bg:(bg&&!/^lihat\s+(pada\s+)?kemasan$/i.test(bg));
     const bxB='<div class="sq"'+at('bc')+'>'+bc+'</div>',bxQ='<div class="sq"'+at('qr')+'><span class="sbp"'+at('bp')+'>BPOM RI</span>'+q2+'</div>';
-    const X=String(m.xi||'').trim()?'<div class="sr" data-ex="1"><b class="sl">'+esc(String(m.xj||'').trim()||'Keterangan')+' :</b> '+esc(m.xi).replace(/\n/g,'<br>')+'</div>':'',xp=m.xp||'kt',P=(k,h)=>h+(xp===k?X:'');
+    const X=String(m.xi||'').trim()?'<div class="sr" data-xb="1" style="position:static!important;transform:none!important;translate:none!important;inset:auto!important;margin:.5cqw 0!important"><b class="sl">'+esc(String(m.xj||'').trim()||'Keterangan')+' :</b> '+esc(m.xi).replace(/\n/g,'<br>')+'</div>':'',xp=m.xp||'kt',P=(k,h)=>h+(xp===k?X:'');
     const sty='--fs:'+f.fs/100+';--ts:'+f.ts/100+';--cs:'+(f.cs||100)/100+';--bq:'+f.bq+'cqw;--ar:'+(f.h/f.w)+';--gp:'+(0.3/(f.w*10)*100)+'cqw;--lh:'+f.lh+';--ff:'+(FFM[f.ff]||FFM.Arial)+LFMG.map(a=>(f[a[0]]!==undefined&&f[a[0]]!==null&&f[a[0]]!=='')?';--'+a[1]+':'+(f[a[0]]/(f.w*10)*100)+'cqw':'').join('')+(f.bd?';border:1px solid #000':'');
     return '<div class="mlw"><div class="ml std" style="'+sty+'">'+g0
       +(f.cg?(c=>c?'<i class="cg '+c+'"></i>':'')((a=>!isFinite(a)||a<0?'':a<=5?'tl':a<=20?'bl':a<=55?'br':'')(parseFloat(String(m.alk==null?'':m.alk).replace(',','.')))):'')
