@@ -1127,14 +1127,15 @@ function perubUp(it,f,t,id){
   const r=new FileReader();r.onload=async()=>{
     const x=dr(it);x.fn=f.name;x.fd=r.result.replace(/^data:[^;,]*/,'data:application/pdf');save();render4();
     try{
-      const lb=await perubFromPdf(f);x.lab=lb;
+      const lb=await perubFromPdf(f);x.lab=lb;applyNieToRev(it,lb);
       const n=['qr','nm','sn','ib','nb','al'].filter(k=>lb[k]).length;
-      nMsg[id]=n?'Data perubahan terbaca ('+n+'/6). Periksa isian di bawah lalu klik Simpan.':'Data tidak berhasil dibaca dari file. Isi manual.';
+      nMsg[id]=n?'Data perubahan terbaca ('+n+'/6) dan sudah masuk ke Revisi > Rancangan ML BPOM. Periksa lalu klik Simpan.':'Data tidak berhasil dibaca dari file. Isi manual.';
     }catch(e){nMsg[id]='Gagal membaca file otomatis (perlu internet). Isi manual.'}
     save();render4();
   };r.readAsDataURL(f);
 }
 function perubFields(i,x){
+  return '';/* kotak dihapus: data langsung masuk Revisi > Rancangan ML BPOM */
   const lb=x.lab;if(!lb)return '';
   const f=(k,l,w)=>'<label class="cnt" style="margin:0;'+(w?'flex:0 0 '+w+';width:'+w:'flex:1 1 230px')+'">'+l+'<input data-lf="'+k+':'+i.id+'" value="'+esc(lb[k]||'')+'"></label>';
   return '<div class="row" style="margin:10px 0 0;gap:8px;flex-wrap:wrap;align-items:flex-start"><div class="cnt" style="width:100%"><b>Data dari File Perubahan</b> (terbaca otomatis dari halaman 1, bisa diedit)</div>'
@@ -1149,11 +1150,12 @@ function perubSave(it,x){
   if(!x.fd){alert('Unggah file perubahan dulu.');return}
   if(!og||!og.nie){alert('Barang asli di NIE & Label tidak ditemukan.');return}
   if(!confirm('Simpan perubahan \u201c'+it.nama+'\u201d? Data barang di NIE & Label (tab 6) akan diperbarui.'))return;
+  {const rd=it.rev&&it.rev.docs&&it.rev.docs.find(z=>z.n===RML);if(rd&&rd.ml){x.lab=x.lab||{};['nm','sn','ib','nb'].forEach(k=>{if(rd.ml[k])x.lab[k]=rd.ml[k]});if(rd.ml.alk)x.lab.al=rd.ml.alk}}
   const L=x.lab||{};og.nie.lab=og.nie.lab||{};
   ['nm','sn','ib','nb','al','qr'].forEach(k=>{if(L[k])og.nie.lab[k]=L[k]});
   (it.perubF||[]).forEach(k=>{if(it[k]!==undefined)og[k]=it[k]});
   if(L.al)og.abv=L.al;
-  og.perubFile={fn:x.fn,fd:x.fd,tgl:new Date().toISOString()};
+  og.perubFile={fn:x.fn,fd:x.fd,nb:String(L.nb||'').replace(/\D/g,''),tgl:new Date().toISOString()};
   items=items.filter(z=>z.id!==it.id);delete S6g()[it.id];
   save();render3();render4();render5();
 }
@@ -1185,6 +1187,30 @@ async function rbaScan(){
 }
 const nMsg={};
 function dr(it){it.reg=it.reg||{};return it.reg.d=it.reg.d||{}}
+/* Data hasil baca NIE -> Revisi Rancangan ML BPOM + kolom Produk (tab 5) */
+function applyNieToRev(it,lb){
+  if(!it||!lb)return;
+  try{
+    const sp=String(lb.sn||'').split(/\s+-\s+/),jn=sp.length>1?sp.shift():'';
+    if(lb.nm)it.nama=lb.nm;
+    if(lb.sn){it.jenis=jn;it.njenis=sp.join(' - ')}
+    if(lb.al)it.abv=lb.al;
+    const x=revDocs(it).find(z=>z.n===RML);
+    if(x){
+      const m=Object.assign(mlDef(it),x.ml||{});
+      ['nm','sn','ib','nb','kp','dp','di'].forEach(k=>{if(lb[k])m[k]=lb[k]});
+      if(lb.al)m.alk=lb.al;
+      x.ml=m;
+    }
+    it.rev.mod=true;
+  }catch(e){console.error(e)}
+}
+function revQr(){
+  if(!revMode||!revId)return null;
+  const it=items.find(i=>i.id===revId);if(!it)return null;
+  const lb=(it.reg&&it.reg.d&&it.reg.d.lab)||(it.nie&&it.nie.lab)||{};
+  return lb.qr||null;
+}
 $('l5').onclick=e=>{
   const d=e.target.dataset;
   if(d.vs){e.preventDefault();const it=items.find(i=>i.id===d.vs);if(it&&it.spb&&it.spb.fd)openDU(it.spb.fd,it.spb.fn);return}
@@ -1197,6 +1223,7 @@ $('l5').onclick=e=>{
     if(it.perub){perubSave(it,x);return}
     if(!x.no||!x.exp||!x.fd){alert('Lengkapi dulu: nomor NIE, tanggal berakhir, dan file NIE.');return}
     if(!confirm('Simpan NIE \u201c'+it.nama+'\u201d dan pindahkan ke NIE & Label?'))return;
+    {const rd=it.rev&&it.rev.docs&&it.rev.docs.find(z=>z.n===RML);if(rd&&rd.ml){x.lab=x.lab||{};['nm','sn','ib','nb','kp','dp','di'].forEach(k=>{if(rd.ml[k])x.lab[k]=rd.ml[k]});if(rd.ml.alk)x.lab.al=rd.ml.alk}}
     it.nie={no:x.no,exp:x.exp,fn:x.fn,fd:x.fd,rba:x.rba,ereg:x.ereg,lab:x.lab||undefined,tgl:new Date().toISOString()};delete it.reg.d;save();render4();return}
   if(d.am){e.preventDefault();actOpen=actOpen===d.am?null:d.am;render4();return}
   const id=d.rv||d.rm||d.rl;if(!id)return;e.preventDefault();
@@ -1232,8 +1259,8 @@ $('l5').onchange=e=>{
       if(!isP)return;
       nMsg[id]+=' Membaca data label dari NIE (OCR, bisa sampai 1 menit)\u2026';render4();
       return nieLabelFromPdf(f,tx).then(lb=>{
-        x.lab=lb;const n=['nm','sn','ib','nb','al','dp','di','kp','qr'].filter(k=>lb[k]).length;
-        nMsg[id]=nMsg[id].replace(/ Membaca data label.*$/,'')+(n?' Data label terbaca ('+n+'/8). Periksa isian di bawah.':' Data label tidak terbaca, isi manual jika perlu.');
+        x.lab=lb;applyNieToRev(it,lb);const n=['nm','sn','ib','nb','al','dp','di','kp','qr'].filter(k=>lb[k]).length;
+        nMsg[id]=nMsg[id].replace(/ Membaca data label.*$/,'')+(n?' Data label terbaca ('+n+'/9) dan sudah masuk ke Revisi > Rancangan ML BPOM.':' Data label tidak terbaca, isi manual jika perlu.');
         save();render4();
       });
     }).catch(()=>{nMsg[id]='Gagal membaca file otomatis (perlu internet). Isi manual.';render4()});
@@ -1277,7 +1304,7 @@ async function oldUpload(e,kind){
         const sp=String(lb.sn||'').split(/\s+-\s+/),jn=sp.length>1?sp.shift():'';
         const it={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),dibuat:new Date().toISOString(),lg:1,nama:nm,jenis:jn,njenis:sp.join(' - '),abv:lb.al||'',
           reg:{tgl:new Date().toISOString(),d:{no:o.no,exp:o.exp||'',fn:f.name,fd:du,lab:lb,rba:isRba(tx),ereg:isEreg(tx)}}};
-        items.unshift(it);have.add(key);ok.push(nm+' \u2014 '+o.no);if(!o.exp)noExp.push(nm);save();
+        items.unshift(it);applyNieToRev(it,lb);have.add(key);ok.push(nm+' \u2014 '+o.no);if(!o.exp)noExp.push(nm);save();
       }catch(err){console.error(err);bad.push(f.name+' (gagal dibaca, perlu internet)')}
     }
   }finally{btn.disabled=false;btn.textContent=old}
@@ -1312,6 +1339,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('paste',e=>{if(e.target.closest&&e.target.closest('.rte')){e.preventDefault();document.execCommand('insertText',false,(e.clipboardData||window.clipboardData).getData('text/plain'))}});
 $('l5').addEventListener('focusout',e=>{const d=e.target.dataset;if(d&&d.lfr){const q=d.lfr.split(':'),it0=items.find(i=>i.id===q[1]);if(it0){const x0=dr(it0);x0.lab=x0.lab||{};x0.lab[q[0]]=rtClean(e.target.innerHTML).trim();save()}}});
 function labFields(i,x){
+  return '';/* kotak Data Label dari NIE dihapus: data langsung masuk Revisi > Rancangan ML BPOM */
   const lb=x.lab;if(!lb)return '';
   const f=(k,l,ta,w)=>'<label class="cnt" style="margin:0;'+(w?'flex:0 0 '+w+';width:'+w:'flex:1 1 230px')+'">'+fcap(k,l)+(ta?'<textarea rows="3" data-lf="'+k+':'+i.id+'">'+esc(lb[k]||'')+'</textarea>':'<input data-lf="'+k+':'+i.id+'" value="'+esc(lb[k]||'')+'">')+'</label>';
   return '<div class="row" style="margin:10px 0 0;gap:8px;flex-wrap:wrap;align-items:flex-start"><div class="cnt" style="width:100%"><b>Data Label dari NIE</b> (terbaca otomatis, bisa diedit; dipakai di tab 6)</div>'
@@ -1343,7 +1371,7 @@ function render5(){
   $('l6').innerHTML=l.length?'<div class="tw"><table id="t6"><thead><tr><th style="white-space:nowrap"><label style="display:inline-flex;gap:6px;align-items:center;margin:0;cursor:pointer;color:inherit;font-size:inherit"><input type="checkbox" id="s6a" style="width:auto"> Pilih semua</label></th><th>Nama Barang</th><th>Golongan</th><th>Isi Bersih</th><th>Tanggal Expire</th><th>Action</th></tr></thead><tbody>'+l.map(i=>{
     const o=S[i.id]||{},pr=items.some(x=>x.perub&&x.perubOf===i.id&&!x.nie);
     return '<tr><td style="white-space:nowrap"><div style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-s6="'+i.id+'"'+(o.on?' checked':'')+' style="width:auto" title="Pilih barang"><input type="number" min="1" max="999" data-q6="'+i.id+'" value="'+(o.q>0?o.q:'')+'" placeholder="Keping" title="Jumlah keping label" style="width:70px;padding:4px 6px"></div></td>'
-     +'<td><b><a href="#" class="l6n" data-l6="'+i.id+'" title="Klik untuk melihat label">'+esc(itTitle6(i))+'</a></b>'+(pr?' <span class="b wip">Perubahan</span>':'')+'<div class="meta" style="margin-top:2px"><a href="#" class="l6e" data-n6="'+i.id+'">'+esc(nieLbl(i))+'</a>'+(i.perubFile?' &nbsp;<a href="#" class="l6e" data-p6="'+i.id+'" title="'+esc(i.perubFile.fn||'Perubahan')+'">Perubahan</a>':'')+' &nbsp;<a href="#" class="l6e" data-v6="'+i.id+'" title="Buat perubahan barang ini ke SPB BPOM (tab 4)">Variasi</a></div></td>'
+     +'<td><b><a href="#" class="l6n" data-l6="'+i.id+'" title="Klik untuk melihat label">'+esc(itTitle6(i))+'</a></b>'+(pr?' <span class="b wip">Perubahan</span>':'')+'<div class="meta" style="margin-top:2px"><a href="#" class="l6e" data-n6="'+i.id+'">'+esc(nieLbl(i))+'</a>'+(i.perubFile?' &nbsp;<a href="#" class="l6e" data-p6="'+i.id+'" title="'+esc(i.perubFile.fn||'Perubahan')+'">Perubahan'+(()=>{const n=String(i.perubFile.nb||(i.nie&&i.nie.lab&&i.nie.lab.nb)||'').replace(/\D/g,'');return n?' '+esc(n):''})()+'</a>':'')+' &nbsp;<a href="#" class="l6e" data-v6="'+i.id+'" title="Buat perubahan barang ini ke SPB BPOM (tab 4)">Variasi</a></div></td>'
      +'<td style="font-weight:700">'+(golOf(ab6(i))||'-')+'</td>'
      +'<td>'+esc(i.kemasan||ib6(i)||'-')+'</td>'
      +'<td'+(exp1y(i.nie.exp)?' style="color:#e03131"':'')+'>'+(i.nie.exp?fmtD(i.nie.exp):'-')+'</td>'
@@ -2068,7 +2096,7 @@ function openML(id){
   const it=curIt(),x=it&&it.docs.find(z=>z.id===id);if(!x)return;
   mlId=id;const m=mlFix(it,Object.assign(mlDef(it),x.ml||{}));if(it.lg&&!x.ml){const L0=(it.reg&&it.reg.d&&it.reg.d.lab)||(it.nie&&it.nie.lab)||{};['nm','sn','ib','nb','dp','di','kp'].forEach(k=>{if(L0[k])m[k]=L0[k]});if(L0.al)m.alk=L0.al}if(it.perub&&!x.mlSaved){const og=items.find(z=>z.id===it.perubOf),L1=(og&&og.nie&&og.nie.lab)||{};if(L1.kp)m.kp=L1.kp;if(L1.dp)m.dp=L1.dp}if(!String(m.di||'').trim()&&CO().nm)m.di=CO().nm;if(PRCAP())m.pr=PRCAP();
   $('ml_dlg').classList.add('xl');$('ml_g').classList.add('rv');const ka=!(m.ka===0||m.ka==='0');
-  $('ml_form').innerHTML=MLF.map(f0=>(f=>f[0]==='alk'?'<div><label>'+f[1]+'</label><input data-m="alk" value="'+esc(m.alk||'')+'"><label class="cnt" style="display:flex;gap:6px;align-items:center;justify-content:flex-start;margin:6px 0 0;cursor:pointer">\u201c'+fcap('al','Mengandung Alkohol')+' \u00b1'+esc(m.alk||'..')+'% v/v\u201d<input type="checkbox" data-m="ka"'+(ka?' checked':'')+' style="width:auto"></label></div>':f[0]==='kt'?'<div><label style="display:flex;gap:6px;align-items:center;justify-content:flex-start;cursor:pointer">'+f[1]+'<input type="checkbox" data-m="kk"'+(m.kk===0||m.kk==='0'?'':' checked')+' style="width:auto" title="Tampilkan di label"></label><input data-m="kt" value="'+esc(m.kt||'')+'"></div>'+'<div><label style="display:flex;gap:6px;align-items:center;justify-content:flex-start;cursor:pointer">Baik digunakan sebelum<input type="checkbox" data-m="kb"'+(m.kb===0||m.kb==='0'?'':' checked')+' style="width:auto" title="Tampilkan di label"></label><input data-m="bg" value="'+esc(m.bg||'')+'"></div>'+'<div style="grid-column:1/-1;margin-top:4px"><label>Judul kotak tambahan (isi sendiri, opsional)</label><input data-m="xj" value="'+esc(m.xj||'')+'" placeholder="mis. Negara Asal"><label style="margin-top:6px">Isi kotak tambahan</label><textarea rows="2" data-m="xi">'+esc(m.xi||'')+'</textarea><label style="margin-top:6px">Letakkan di bawah baris</label><select data-m="xp">'+[['ib',fcap('ib','Isi Bersih')],['al',fcap('al','Mengandung Alkohol')],['kt',fcap('kt','Kode &amp; Tanggal Produksi')],['bg',fcap('bg','Baik digunakan sebelum')],['kp',fcap('kp','Komposisi')],['nb',fcap('nb','BPOM RI ML')],['dp',fcap('dp','Diproduksi Oleh')],['di',fcap('di','Diimpor Oleh')]].map(o=>'<option value="'+o[0]+'"'+((m.xp||'kt')===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></div>':f[0]==='bg'?'':f[0]==='kp'?'<div style="grid-column:1/-1"><label>'+f[1]+'</label>'+rtEd(m.kp,'data-m="kp"',0,1)+'</div>':f[2]==='ta'?'<div style="grid-column:1/-1"><label>'+f[1]+'</label><textarea rows="2" data-m="'+f[0]+'"'+(f[0]==='pr'&&PRCAP()?' readonly title="Mengikuti pengaturan tab 7 (Bagian terpilih → Peringatan → Ganti teks)"':'')+'>'+esc(m[f[0]]||'')+'</textarea></div>':'<div><label>'+f[1]+'</label><input data-m="'+f[0]+'" value="'+esc(m[f[0]]||'')+'"></div>')(fcapRow(f0))).join('');
+  $('ml_form').innerHTML=MLF.map(f0=>(f=>f[0]==='alk'?'<div><label>'+f[1]+'</label><input data-m="alk" value="'+esc(m.alk||'')+'"><label class="cnt" style="display:flex;gap:6px;align-items:center;justify-content:flex-start;margin:6px 0 0;cursor:pointer">\u201c'+fcap('al','Mengandung Alkohol')+' \u00b1'+esc(m.alk||'..')+'% v/v\u201d<input type="checkbox" data-m="ka"'+(ka?' checked':'')+' style="width:auto"></label></div>':f[0]==='kt'?'<div><label style="display:flex;gap:6px;align-items:center;justify-content:flex-start;cursor:pointer">'+f[1]+'<input type="checkbox" data-m="kk"'+(m.kk===0||m.kk==='0'?'':' checked')+' style="width:auto" title="Tampilkan di label"></label><input data-m="kt" value="'+esc(m.kt||'')+'"></div>'+'<div><label style="display:flex;gap:6px;align-items:center;justify-content:flex-start;cursor:pointer">Baik digunakan sebelum<input type="checkbox" data-m="kb"'+(m.kb===0||m.kb==='0'?'':' checked')+' style="width:auto" title="Tampilkan di label"></label><input data-m="bg" value="'+esc(m.bg||'')+'"></div>'+'<div style="grid-column:1/-1;margin-top:4px;display:flex;gap:14px;align-items:flex-start"><div style="flex:1 1 auto;min-width:0"><label>Judul kotak tambahan (isi sendiri, opsional)</label><input data-m="xj" value="'+esc(m.xj||'')+'" placeholder="mis. Negara Asal"><label style="margin-top:6px">Isi kotak tambahan</label><textarea rows="2" data-m="xi">'+esc(m.xi||'')+'</textarea><label style="margin-top:6px">Letakkan di bawah baris</label><select data-m="xp">'+[['ib',fcap('ib','Isi Bersih')],['al',fcap('al','Mengandung Alkohol')],['kt',fcap('kt','Kode &amp; Tanggal Produksi')],['bg',fcap('bg','Baik digunakan sebelum')],['kp',fcap('kp','Komposisi')],['nb',fcap('nb','BPOM RI ML')],['dp',fcap('dp','Diproduksi Oleh')],['di',fcap('di','Diimpor Oleh')]].map(o=>'<option value="'+o[0]+'"'+((m.xp||'kt')===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></div>'+(revQr()?'<div style="flex:0 0 auto;text-align:center"><label>Barcode dari NIE</label><img src="'+revQr()+'" alt="Barcode" style="height:90px;border:1px solid var(--bd);border-radius:6px;background:#fff;display:block;margin-top:4px"></div>':'')+'</div>':f[0]==='bg'?'':f[0]==='kp'?'<div style="grid-column:1/-1"><label>'+f[1]+'</label>'+rtEd(m.kp,'data-m="kp"',0,1)+'</div>':f[2]==='ta'?'<div style="grid-column:1/-1"><label>'+f[1]+'</label><textarea rows="2" data-m="'+f[0]+'"'+(f[0]==='pr'&&PRCAP()?' readonly title="Mengikuti pengaturan tab 7 (Bagian terpilih → Peringatan → Ganti teks)"':'')+'>'+esc(m[f[0]]||'')+'</textarea></div>':'<div><label>'+f[1]+'</label><input data-m="'+f[0]+'" value="'+esc(m[f[0]]||'')+'"></div>')(fcapRow(f0))).join('');
   $('ml_title').textContent=x.n+' \u2014 '+it.nama;mlUpd();$('mo3').style.display='flex';mlFit($('ml_prev'));mlPrevFit();
 }
 function closeML(){$('mo3').style.display='none';mlId=null;if(revMode){if(lbId)lbRender();else revEnd()}else{render2();if(lbId)lbRender()}}
