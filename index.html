@@ -95,7 +95,7 @@ textarea:focus{outline:2px solid var(--ac)}
 .ed{cursor:pointer;color:var(--ac);text-decoration:underline dotted}
 .ec{margin-bottom:6px}
 .md.wide{max-width:780px}
-.p7g{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.p7g .c1{grid-column:1}.p7g .c2{grid-column:2}@media(max-width:640px){.p7g{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.p7g{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-start}.p7g>div{flex:none;max-width:100%}.p7g label{font-size:11px;margin-bottom:2px}.p7g input,.p7g textarea{font-size:12px;padding:4px 6px;border-radius:6px}.p7g textarea{resize:vertical}.p7g .w1{width:170px}.p7g .w2{width:210px}.p7g .w3{width:110px}.p7g .w4{width:130px}.p7g .w5{width:190px}.p7g .w6{width:150px}.p7g .w7{width:70px}.p7g .w8{width:95px}.km{position:relative;margin-bottom:3px}.km input{padding-right:24px}.km button{position:absolute;right:2px;top:50%;transform:translateY(-50%);width:20px;height:20px;padding:0;line-height:1;font-size:14px;border-radius:5px}
 .md.xl{max-width:1240px}
 #ml_g.rv{display:grid;grid-template-columns:minmax(300px,480px) minmax(0,1fr);gap:18px;align-items:start}#ml_g.rv #ml_prev{margin-top:0;position:sticky;top:0}@media(max-width:820px){#ml_g.rv{grid-template-columns:1fr}#ml_g.rv #ml_prev{margin-top:14px;position:static}}
 .lbz{position:relative}
@@ -192,12 +192,13 @@ input[type=color]{width:34px;height:26px;padding:0;border:0;background:none;curs
 .d2t .dots .r{background:#d64545}.d2t .dots .g{background:#2fa36b}.d2t .dots button.on{opacity:1;box-shadow:0 0 0 2px var(--bd)}
 .d2t .un{font-weight:600}.d2t tr.mu .un{color:var(--mu)}.d2t .un.ed{cursor:pointer;text-decoration:underline dotted}
 .d2t input[type=text],.d2t select{width:100%;min-width:0;font-size:12px;padding:4px 6px}
+.loe{display:flex;flex-direction:column;gap:6px}.loe .lr{display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center;min-height:26px}.loe label{display:inline-flex;gap:6px;align-items:center;margin:0;cursor:pointer;font-size:14px;color:var(--tx)}.loe input[type=checkbox]{width:auto;margin:0}.loe .gap{height:4px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Asisten Registrasi BPOM</h1>
-  <p class="sub"><span id="syn">Memuat…</span> <a href="#" id="lout" style="display:none;margin-left:8px">Keluar</a></p>
+  <p class="sub"><span id="syn">Memuat…</span> <a href="#" id="lout" style="display:none;margin-left:8px">Keluar</a> <span style="margin-left:8px;opacity:.5;font-size:11px">v12nov-b</span></p>
   <div class="tabs">
     <div class="tab on" data-t="1">1. Pencatatan Barang</div>
     <div class="tab" data-t="2">2. Kelengkapan Dokumen</div>
@@ -239,7 +240,7 @@ input[type=color]{width:34px;height:26px;padding:0;border:0;background:none;curs
     <div class="subtabs" id="sb3"><div class="tab on" data-p3="d" id="p3d">Daftar Pabrik</div><div class="tab" data-p3="p" id="p3p">Proses</div><div class="tab" data-p3="a" id="p3a">Disetujui</div></div>
     <div class="card">
       <div class="row" style="margin-top:0"><b>PABRIK</b><span class="cnt" id="pcnt"></span><span class="sp"></span><select id="pflt" style="width:auto"><option value="">Semua</option><option>Lengkap</option><option>Belum Lengkap</option></select></div>
-      <div class="cnt" style="margin-top:6px">Satu baris = satu pabrik (nama + alamat dari tab 1; yang sama digabung jadi satu). Lengkap = minimal satu barang dari pabrik tersebut sudah terisi lengkap di LOA, CFS, dan NKV / HACCP / ISO. Kolom dokumen menampilkan nama dan alamat yang diisi di Kelengkapan Dokumen.</div>
+      <div class="cnt" style="margin-top:6px">Satu baris = satu pabrik (nama + alamat dari tab 1; yang sama digabung jadi satu). Lengkap = minimal satu barang dari pabrik tersebut punya nama dan alamat yang sama dengan Pabrik (Label) di CFS dan NKV / HACCP / ISO, atau di LOA / LOE, CFS, dan NKV / HACCP / ISO. Kolom dokumen menampilkan nama dan alamat yang diisi di Kelengkapan Dokumen.</div>
       <div class="tw" style="margin-top:10px"><table id="tp"><thead><tr><th>Pabrik (Label)</th><th>Barang</th><th>LOA</th><th>LOE</th><th>CFS</th><th>NKV / HACCP / ISO</th><th>Status</th><th>Action</th></tr></thead><tbody id="tbp"></tbody></table></div>
     </div>
   </div>
@@ -286,15 +287,23 @@ input[type=color]{width:34px;height:26px;padding:0;border:0;background:none;curs
 <div id="mo7" class="mo" style="display:none"><div class="md wide" role="dialog" aria-modal="true" aria-labelledby="p7t">
   <h2 id="p7t">Tambah Principal</h2>
   <div class="p7g" style="margin-top:0">
-    <div class="c1"><label for="p7p">Principal</label><input id="p7p" list="dl_prin" placeholder="mis. PT Contoh Farma"></div>
-    <div class="c2"><label for="p7a">Alamat Principal</label><textarea id="p7a" rows="2"></textarea></div>
-    <div><label for="p7c">PIC</label><input id="p7c" list="dl_pic" placeholder="mis. Budi"></div>
-    <div class="c1"><label for="p7d1">Tanggal Terbit</label><input type="date" id="p7d1"></div>
-    <div class="c2"><label for="p7d2">Tanggal Berakhir</label><input type="date" id="p7d2"></div>
+    <div class="w1"><label for="p7p">Principal</label><input id="p7p" list="dl_prin"></div>
+    <div class="w2"><label for="p7a">Alamat</label><textarea id="p7a" rows="1"></textarea></div>
+    <div class="w3"><label for="p7c">PIC</label><input id="p7c" list="dl_pic"></div>
+  </div>
+  <div class="p7g" style="margin-top:8px">
+    <div class="w4"><label for="p7d1">Tgl Terbit</label><input type="date" id="p7d1"></div>
+    <div class="w4"><label for="p7d2">Tgl Berakhir</label><input type="date" id="p7d2"></div>
   </div>
   <div class="row"><b>Barang</b><span class="sp"></span><button class="p" id="p7add">+ Tambah</button></div>
   <div id="p7b"></div>
   <div class="row"><button class="p" id="p7s">Simpan</button><button id="p7x">Batal</button></div>
+</div></div>
+
+<div id="mo_loe" class="mo" style="display:none"><div class="md" style="max-width:480px" role="dialog" aria-modal="true" aria-labelledby="loe_t">
+  <h2 id="loe_t">LOE (Alur Kerjasama)</h2>
+  <div class="loe" id="loe_b"></div>
+  <div class="row"><button class="p" id="loe_save">Simpan</button><button id="loe_cancel">Batal</button></div>
 </div></div>
 
 <div id="mo2" class="mo" style="display:none"><div class="md" role="dialog" aria-modal="true" aria-labelledby="e_title">
@@ -649,16 +658,19 @@ function openM(it){auto={};fillDl();editId=it?it.id:null;MF.forEach(k=>$(k).valu
 function closeM(){$('mo').style.display='none';editId=null}
 $('tambah').onclick=()=>openP();
 $('tambah').textContent='+ Tambah Principal';
-function p7blk(n){return '<div class="p7i" style="border:1px solid var(--bd);border-radius:10px;padding:10px;margin-top:10px"><div class="row" style="margin-top:0"><b class="p7n">Barang '+n+'</b><span class="sp"></span><button class="d" data-p7r="1">Hapus</button></div><div class="p7g">'
-+'<div><label>Nama Barang</label><input data-f="nama" placeholder="mis. DE KUYPER Creme de Menthe Green"></div>'
-+'<div><label>Nama Jenis</label><input data-f="njenis" list="dl_njenis" placeholder="mis. Creme de Menthe"></div>'
-+'<div><label>Kadar Alkohol (%)</label><input data-f="abv" list="dl_abv" inputmode="decimal" placeholder="mis. 24"></div>'
-+'<div><label>Kemasan</label><input data-f="kemasan" list="dl_kem" placeholder="mis. Botol kaca ( 700 mL )"></div>'
-+'<div><label>Kategori Pangan</label><input data-f="jenis" list="dl_jenis" placeholder="mis. Liqueur"></div>'
-+'<div><label>Warna</label><input data-f="warna" placeholder="mis. Hijau"></div>'
-+'<div><label>Parameter</label><input data-f="param"></div>'
-+'<div class="c1"><label>Pabrik</label><input data-f="pab" list="dl_pab"></div>'
-+'<div class="c2"><label>Alamat Pabrik</label><textarea data-f="apab" rows="2"></textarea></div></div></div>'}
+function p7km(first){return '<div class="km"><input data-f="kemasan" list="dl_kem" placeholder="mis. 700ml / 1 L"><button type="button" class="'+(first?'p':'d')+'" '+(first?'data-p7km="1" title="Tambah kemasan"':'data-p7kx="1" title="Hapus kemasan"')+'>'+(first?'+':'\u00d7')+'</button></div>'}
+function p7blk(n){return '<div class="p7i" style="border:1px solid var(--bd);border-radius:10px;padding:10px;margin-top:10px"><div class="row" style="margin-top:0"><b class="p7n">Barang '+n+'</b><span class="sp"></span><button class="d" data-p7r="1">Hapus</button></div><div class="p7g" style="margin-top:6px">'
++'<div class="w5"><label>Nama Barang</label><input data-f="nama"></div>'
++'<div class="w6"><label>Nama Jenis</label><input data-f="njenis" list="dl_njenis"></div>'
++'<div class="w7"><label>Kadar (%)</label><input data-f="abv" list="dl_abv" inputmode="decimal"></div>'
++'<div class="w4"><label>Kategori Pangan</label><input data-f="jenis" list="dl_jenis"></div></div>'
++'<div class="p7g" style="margin-top:8px">'
++'<div class="w6 p7kw"><label>Kemasan</label>'+p7km(true)+'</div>'
++'<div class="w8"><label>Warna</label><input data-f="warna"></div>'
++'<div class="w4"><label>Parameter</label><input data-f="param"></div></div>'
++'<div class="p7g" style="margin-top:8px">'
++'<div class="w1"><label>Pabrik</label><input data-f="pab" list="dl_pab"></div>'
++'<div class="w2"><label>Alamat</label><textarea data-f="apab" rows="1"></textarea></div></div></div>'}
 function p7num(){const b=[...document.querySelectorAll('#p7b .p7i')];b.forEach((e,i)=>{e.querySelector('.p7n').textContent='Barang '+(i+1);e.querySelector('[data-p7r]').style.display=b.length>1?'':'none'})}
 function p7addB(){$('p7b').insertAdjacentHTML('beforeend',p7blk($('p7b').children.length+1));p7num()}
 const LOAN='LOA / Surat Penunjukan';
@@ -678,7 +690,7 @@ function openP(){fillDl();['p7p','p7a','p7c','p7d1','p7d2'].forEach(i=>$(i).valu
 function closeP(){$('mo7').style.display='none'}
 $('p7add').onclick=()=>{p7addB();const l=$('p7b').lastElementChild;l.scrollIntoView({block:'nearest'});l.querySelector('[data-f=nama]').focus()};
 $('p7x').onclick=closeP;
-$('mo7').onclick=e=>{if(e.target.id==='mo7')closeP();const r=e.target.closest('[data-p7r]');if(r){r.closest('.p7i').remove();p7num()}};
+$('mo7').onclick=e=>{if(e.target.id==='mo7')closeP();const kp=e.target.closest('[data-p7km]');if(kp){const w=kp.closest('.p7kw');w.insertAdjacentHTML('beforeend',p7km(false));w.lastElementChild.querySelector('input').focus();return}const kx=e.target.closest('[data-p7kx]');if(kx){kx.closest('.km').remove();return}const r=e.target.closest('[data-p7r]');if(r){r.closest('.p7i').remove();p7num()}};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeP()});
 const p7fill=e=>{const t=e.target;if(e.type!=='change'&&e.inputType&&e.inputType!=='insertReplacementText')return;
   if(t.id==='p7p'){const v=t.value.trim().toLowerCase(),f=v&&items.find(i=>(i.prin||'').trim().toLowerCase()===v);if(f){if(!$('p7a').value.trim()&&f.aprin)$('p7a').value=f.aprin;if(!$('p7c').value.trim()&&f.pic)$('p7c').value=f.pic;if(!$('p7d1').value&&f.ptt)$('p7d1').value=f.ptt;if(!$('p7d2').value&&f.ptb)$('p7d2').value=f.ptb}}
@@ -687,7 +699,7 @@ $('mo7').addEventListener('input',p7fill);$('mo7').addEventListener('change',p7f
 $('p7s').onclick=()=>{
   const prin=$('p7p').value.trim();if(!prin){$('p7p').focus();return}
   const base={prin,aprin:$('p7a').value.trim(),pic:$('p7c').value.trim(),ptt:$('p7d1').value,ptb:$('p7d2').value},out=[];
-  document.querySelectorAll('#p7b .p7i').forEach(e=>{const v={};e.querySelectorAll('[data-f]').forEach(x=>v[x.dataset.f]=x.value.trim());v.abv=v.abv.replace(',','.');if(v.nama)out.push(Object.assign({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),dibuat:new Date().toISOString()},base,v))});
+  document.querySelectorAll('#p7b .p7i').forEach(e=>{const v={},kl=[];e.querySelectorAll('[data-f]').forEach(x=>{if(x.dataset.f==='kemasan'){if(x.value.trim())kl.push(x.value.trim())}else v[x.dataset.f]=x.value.trim()});v.abv=v.abv.replace(',','.');if(v.nama)out.push(Object.assign({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),dibuat:new Date().toISOString()},base,v,{kemasan:kl.join(' / ')}))});
   if(!out.length){alert('Isi minimal satu barang (Nama Barang).');const f=document.querySelector('#p7b [data-f=nama]');if(f)f.focus();return}
   items.unshift(...out);out.forEach(autoLOA);save();closeP();render();
 };
@@ -870,7 +882,7 @@ function render2(){
   const d=docsOf(it).map((z,k)=>[z,k]).sort((a,b)=>{const q=n=>{const i=ORD.indexOf(n);return i<0?999:i};return q(a[0].n)-q(b[0].n)||a[1]-b[1]}).map(a=>a[0]);
   const dt=v=>v?fmtD(v):'';
   const row=x=>{
-    const coa=x.n==='COA',nm=coa?(x.cnm||''):(x.en||''),tt=x.tt||'',tb=coa?plus1y(x.tt):(x.tb||'');
+    const coa=x.n==='COA',nm=coa?(x.cnm||''):(x.n===LOEN&&x.alur?alurTxt(x.alur):(x.en||'')),tt=x.tt||'',tb=coa?plus1y(x.tt):(x.tb||'');
     const folder=(coa&&x.fd?'<div style="display:flex;gap:8px;align-items:center;justify-content:center"><a href="#" data-v="'+x.id+'">Lihat</a><button type="button" class="d" data-rf="'+x.id+'" title="Hapus file">hapus file</button></div>':'')
       +(x.fd&&!coa?'<div class="fnm" style="text-align:center"><a href="#" data-v="'+x.id+'">'+esc(x.fn||'File')+'</a> <button type="button" class="d" data-rf="'+x.id+'" title="Hapus file lama">hapus file</button></div>':'');
     return '<tr'+(x.s===0?' class="mu"':'')+'><td><div class="un'+nameAttr(x)+'">'+esc(SHORT[x.n]||x.n)+'</div></td>'
@@ -936,7 +948,7 @@ $('dbody').onclick=e=>{
   }
   if(t.id==='ad'){const n=$('nd').value.trim();if(n){it.docs.push({id:uid(),n,s:0});save();render2()}}
 };
-function okPab(it){const g=grpOf(it);return ppOf(g)==='Disetujui'&&g.some(i=>sameEnt(i,PA)||sameEnt(i,PB))}
+function okPab(it){const g=grpOf(it);return ppOf(g)==='Disetujui'&&g.some(i=>okLen(i))}
 function eligible(it){return !!it.perub||(pct(it)>=90&&okPab(it))}
 function fmtD(v){const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?m[3]+'-'+m[2]+'-'+m[1]:esc(v||'')}
 const sMsg={};
@@ -1564,6 +1576,8 @@ $('l4').onclick=e=>{
 };
 const PA=['LOA / Surat Penunjukan','CFS / Health Certificate','NKV, HACCP, ISO'];
 const PB=['LOE / Surat Pernyataan','CFS / Health Certificate','NKV, HACCP, ISO'];
+const PC=['CFS / Health Certificate','NKV, HACCP, ISO'];
+const okLen=i=>sameEnt(i,PA)||sameEnt(i,PB)||sameEnt(i,PC);
 const NKV='NKV, HACCP, ISO';
 function norm(s){return String(s||'').toLowerCase().replace(/\s+/g,' ').trim()}
 function sameEnt(it,names){
@@ -1637,7 +1651,7 @@ function renderP(){
   items.forEach(i=>{if(hid(i))return;const k=pkey(i);if(!k)return;(g[k]=g[k]||{n:fac(i).n||fac(i).a,k:k,it:[]}).it.push(i)});
   let rows=Object.values(g).map(o=>{
     const e=EDN.map(n=>{const m={};o.it.forEach(i=>{const x=docsOf(i).find(z=>z.n===n);if(x&&(x.en||x.ea)){const kk=[x.ent,x.en,x.ea].join('|').toLowerCase();if(!m[kk])m[kk]=x}});return Object.values(m)});
-    return {n:o.n,k:o.k,a:(o.it.find(i=>i.pp&&i.pp!=='Proses')||{}).pp||'',fc:fac(o.it[0]),N:o.it.length,e,lm:labMiss(e,fac(o.it[0])),ok:o.it.some(i=>sameEnt(i,PA)||sameEnt(i,PB)),pd:pabDetail(o.it)};
+    return {n:o.n,k:o.k,a:(o.it.find(i=>i.pp&&i.pp!=='Proses')||{}).pp||'',fc:fac(o.it[0]),N:o.it.length,e,lm:labMiss(e,fac(o.it[0])),ok:o.it.some(i=>okLen(i)),pd:pabDetail(o.it)};
   });
   rows.sort((a,b)=>a.n.localeCompare(b.n));
   const MS={d:'',p:'Diajukan',a:'Disetujui'},cn=m=>rows.filter(r=>r.a===MS[m]).length;
@@ -1668,7 +1682,30 @@ function copyTxt(t,b){
 $('tbp').onclick=e=>{const d=e.target.dataset;
   if(d.cp!==undefined){copyTxt(d.cp,e.target);return}
   if(d.pb!==undefined){const to=d.ps==='Diajukan'?'Proses':'Daftar Pabrik';if(!confirm('Kembalikan pabrik ini ke '+to+'?'+(d.ps==='Diajukan'?' Barangnya tidak lagi memenuhi syarat di SPB BPOM sampai disetujui lagi.':'')))return;items.forEach(i=>{if(pkey(i)===d.pb)i.pp=d.ps});save();renderP();return}
-  if(d.pg!==undefined){if(d.ps==='Diajukan'&&!items.some(i=>pkey(i)===d.pg&&(sameEnt(i,PA)||sameEnt(i,PB)))){alert('Status masih Belum, belum bisa diproses.');return}items.forEach(i=>{if(pkey(i)===d.pg)i.pp=d.ps});save();renderP()}};
+  if(d.pg!==undefined){if(d.ps==='Diajukan'&&!items.some(i=>pkey(i)===d.pg&&okLen(i))){alert('Status masih Belum, belum bisa diproses.');return}items.forEach(i=>{if(pkey(i)===d.pg)i.pp=d.ps});save();renderP()}};
+const LOEN='LOE / Surat Pernyataan';
+const LOEG=[['a',['Principal','Pabrik']],['b',['Adalah','Sebagai']],['c',['Owner','Distributor','Agent','Pabrik']],['d',['Untuk','Dari']],['e',['Principal','Pabrik','Barang']]];
+function alurTxt(a){return a?LOEG.map(g=>a[g[0]]||'').filter(Boolean).join(' '):''}
+let loeId=null;
+function openLOE(id){
+  const it=items.find(i=>i.id===selId),x=it&&it.docs.find(z=>z.id===id);if(!x)return;
+  loeId=id;const a=x.alur||{};
+  $('loe_b').innerHTML=LOEG.map((g,k)=>(k?'<div class="gap"></div>':'')+'<div class="lr">'+g[1].map(v=>'<label><input type="checkbox" data-g="'+g[0]+'" value="'+v+'"'+(a[g[0]]===v?' checked':'')+'> '+v+'</label>').join('')+'</div>').join('');
+  $('mo_loe').style.display='flex';
+}
+function closeLOE(){$('mo_loe').style.display='none';loeId=null}
+$('loe_b').addEventListener('change',e=>{const t=e.target;if(t.dataset.g&&t.checked)$('loe_b').querySelectorAll('[data-g="'+t.dataset.g+'"]').forEach(c=>{if(c!==t)c.checked=false})});
+$('loe_save').onclick=()=>{
+  const it=items.find(i=>i.id===selId),x=it&&it.docs.find(z=>z.id===loeId);
+  if(x){const a={};LOEG.forEach(g=>{const c=$('loe_b').querySelector('[data-g="'+g[0]+'"]:checked');if(c)a[g[0]]=c.value});
+    const n=Object.keys(a).length;x.alur=n?a:undefined;if(!n)delete x.alur;
+    if(n===LOEG.length)x.s=2;else if(n&&x.s===0)x.s=1;else if(!n&&x.s<2)x.s=0;
+    save()}
+  closeLOE();render2();
+};
+$('loe_cancel').onclick=closeLOE;
+$('mo_loe').onclick=e=>{if(e.target.id==='mo_loe')closeLOE()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLOE()});
 let eId=null,eAuto='';
 function eKeys(){const p=$('e_t').value==='Principal';return p?['prin','aprin']:['pab','apab']}
 function enNames(){
@@ -1745,6 +1782,7 @@ function eCfsTb(){
 $('e_tt').addEventListener('change',eCfsTb);
 function openE(id){
   const it=items.find(i=>i.id===selId),x=it&&it.docs.find(z=>z.id===id);if(!x)return;
+  if(x.n===LOEN){openLOE(id);return}
   eId=id;eAuto='';
   $('e_title').textContent=x.n;$('e_t').value=x.ent||'Principal';$('e_n').value=x.en||'';$('e_a').value=x.ea||'';$('e_tt').value=x.tt||'';$('e_tb').value=x.tb||'';eAutoTb='';
   enList();ePre();enPick();
@@ -1844,14 +1882,15 @@ function mlFix(it,m){
     if(k>0){const n=d.slice(0,k);if(String(m.dp).startsWith(n)&&String(m.dp).length>n.length)return Object.assign({},m,{dp:n+'\n'+String(m.dp).slice(n.length).trim()})}}catch(e){}
   return m;
 }
-function mlComplete(m){return !!m&&MLREQ.every(k=>(k==='alk'&&(m.ka===0||m.ka==='0'))||String(m[k]||'').trim())}
+const mlOff=(m,k)=>(k==='alk'&&(m.ka===0||m.ka==='0'))||(k==='kt'&&(m.kk===0||m.kk==='0'))||(k==='bg'&&(m.kb===0||m.kb==='0'));
+function mlComplete(m){return !!m&&MLREQ.every(k=>mlOff(m,k)||String(m[k]||'').trim())}
 function mlDef(it){
   const g=grpOf(it),pd=ppOf(g)==='Disetujui'?pabDetail(g):{n:it.pab||'',a:it.apab||''};
   const km=String(it.kemasan||'').match(/(\d+(?:[.,]\d+)?)\s*(ml|cl|liter|l)\b/i);
-  return {jd:'MINUMAN BERALKOHOL',nm:it.nama||'',sn:it.njenis||'',ib:km?km[1]+' '+km[2].toLowerCase().replace('liter','l'):'',alk:it.abv||'',nb:'',kt:'Lihat Kemasan',bg:'Lihat pada kemasan',kp:'',dp:[pd.n,pd.a].filter(Boolean).join('\n'),di:CO().nm||'',pr:'"DI BAWAH UMUR 21 TAHUN ATAU WANITA HAMIL DILARANG MINUM"'};
+  return {jd:'MINUMAN BERALKOHOL',nm:it.nama||'',sn:[it.jenis,it.njenis].map(v=>String(v||'').trim()).filter(Boolean).join(' - '),ib:km?km[1]+' '+km[2].toLowerCase().replace('liter','l'):'',alk:it.abv||'',nb:'',kt:'Lihat Kemasan',bg:'Lihat pada kemasan',kp:'',dp:[pd.n,pd.a].filter(Boolean).join('\n'),di:CO().nm||'',pr:'"DI BAWAH UMUR 21 TAHUN ATAU WANITA HAMIL DILARANG MINUM"'};
 }
 function mlHTML(m,ed,qr,showBc,noBc){
-  const ka=!(m.ka===0||m.ka==='0');
+  const ka=!(m.ka===0||m.ka==='0'),kk=!(m.kk===0||m.kk==='0'),kb=!(m.kb===0||m.kb==='0');
   if(showBc===true||showBc==='pv'){
     const pv=showBc==='pv',f=LF(),EL=f.el||{};
     const eL=EL.lg||{},lw=Math.round(LOGO.w*(eL.fs||100))/100,g0=LOGO.src?'<div class="mlg" data-el="lg" style="left:'+LOGO.l+'%;top:'+LOGO.t+'%;width:'+lw+'%'+(eL.h?(pv?';opacity:.3':';display:none'):'')+((eL.x||eL.y)?';transform:translate('+(eL.x||0)+'cqw,'+(eL.y||0)+'cqw)':'')+'"><img src="'+LOGO.src+'" alt="" draggable="false" style="opacity:'+LOGO.o+'"></div>':'';
@@ -1872,17 +1911,18 @@ function mlHTML(m,ed,qr,showBc,noBc){
     const R=(k,a,b)=>'<div class="sr"'+at(k)+'><b class="sl">'+a+' :</b> '+esc(b).replace(/\n/g,'<br>')+'</div>';
     const bg=String(m.bg||'').trim(),showBg=f.bg==='hide'?false:f.bg==='show'?!!bg:(bg&&!/^lihat\s+(pada\s+)?kemasan$/i.test(bg));
     const bxB='<div class="sq"'+at('bc')+'>'+bc+'</div>',bxQ='<div class="sq"'+at('qr')+'><span class="sbp"'+at('bp')+'>BPOM RI</span>'+q2+'</div>';
+    const X=String(m.xi||'').trim()?'<div class="sr" data-ex="1"><b class="sl">'+esc(String(m.xj||'').trim()||'Keterangan')+' :</b> '+esc(m.xi).replace(/\n/g,'<br>')+'</div>':'',xp=m.xp||'kt',P=(k,h)=>h+(xp===k?X:'');
     const sty='--fs:'+f.fs/100+';--ts:'+f.ts/100+';--cs:'+(f.cs||100)/100+';--bq:'+f.bq+'cqw;--ar:'+(f.h/f.w)+';--gp:'+(0.3/(f.w*10)*100)+'cqw;--lh:'+f.lh+';--ff:'+(FFM[f.ff]||FFM.Arial)+LFMG.map(a=>(f[a[0]]!==undefined&&f[a[0]]!==null&&f[a[0]]!=='')?';--'+a[1]+':'+(f[a[0]]/(f.w*10)*100)+'cqw':'').join('')+(f.bd?';border:1px solid #000':'');
     return '<div class="mlw"><div class="ml std" style="'+sty+'">'+g0
       +(f.cg?(c=>c?'<i class="cg '+c+'"></i>':'')((a=>!isFinite(a)||a<0?'':a<=5?'tl':a<=20?'bl':a<=55?'br':'')(parseFloat(String(m.alk==null?'':m.alk).replace(',','.')))):'')
       +'<div class="sh"'+at('jd')+'>'+esc(m.jd)+'</div>'
       +'<div class="st">'+(f.sw?bxQ:bxB)+'<div class="sm"><div class="s1"'+at('nm')+'>'+esc(m.nm)+'</div><div class="s2"'+at('sn')+'>'+esc(m.sn)+'</div></div>'+(f.sw?bxB:bxQ)+'</div>'
-      +R('ib','Isi Bersih',m.ib)
-      +(ka?'<div class="sr"'+at('al')+'>Mengandung Alkohol \u00b1'+esc(String(m.alk).replace(',','.'))+'% v/v</div>':'')
-      +R('kt','Kode &amp; Tanggal Produksi',m.kt)+(showBg||pv?'<div class="sr"'+at('bg',!showBg)+'><b class="sl">Baik digunakan sebelum :</b> '+esc(bg||'Lihat pada kemasan')+'</div>':'')
-      +'<div class="sr"'+at('kp')+'><b class="sl">Komposisi :</b> '+rtClean(m.kp)+'</div>'
-      +'<div class="sr"'+at('nb')+'>BPOM RI ML'+(m.nb?' '+esc(m.nb):'')+'</div>'
-      +R('dp','Diproduksi Oleh',m.dp)+R('di','Diimpor Oleh',m.di)
+      +P('ib',R('ib','Isi Bersih',m.ib))
+      +P('al',ka?'<div class="sr"'+at('al')+'>Mengandung Alkohol \u00b1'+esc(String(m.alk).replace(',','.'))+'% v/v</div>':'')
+      +P('kt',kk?R('kt','Kode &amp; Tanggal Produksi',m.kt):'')+P('bg',kb&&(showBg||pv)?'<div class="sr"'+at('bg',!showBg)+'><b class="sl">Baik digunakan sebelum :</b> '+esc(bg||'Lihat pada kemasan')+'</div>':'')
+      +P('kp','<div class="sr"'+at('kp')+'><b class="sl">Komposisi :</b> '+rtClean(m.kp)+'</div>')
+      +P('nb','<div class="sr"'+at('nb')+'>BPOM RI ML'+(m.nb?' '+esc(m.nb):'')+'</div>')
+      +P('dp',R('dp','Diproduksi Oleh',m.dp))+P('di',R('di','Diimpor Oleh',m.di))
       +'<div class="sx"'+at('pr')+'>'+esc(m.pr)+'</div></div></div>';
   }
   const L=(a,b)=>'<div class="mlr"><b>'+a+' :</b> '+esc(b)+'</div>';
@@ -1893,7 +1933,7 @@ function mlHTML(m,ed,qr,showBc,noBc){
    +'<div class="mln"><div>'+esc(m.nm)+'</div><div>'+esc(m.sn)+'</div></div>'
    +L('Isi Bersih',m.ib)
    +(ka?'<div class="mlr">Mengandung  Alkohol \u00b1'+esc(String(m.alk).replace(',','.'))+'% v/v</div>':'')
-   +L('Kode &amp; Tanggal Produksi',m.kt)+L('Baik digunakan sebelum',m.bg)+'<div class="mlr"><b>Komposisi :</b> '+rtClean(m.kp)+'</div>'
+   +(kk?L('Kode &amp; Tanggal Produksi',m.kt):'')+(String(m.xi||'').trim()?L(esc(String(m.xj||'').trim()||'Keterangan'),m.xi):'')+(kb?L('Baik digunakan sebelum',m.bg):'')+'<div class="mlr"><b>Komposisi :</b> '+rtClean(m.kp)+'</div>'
    +'<div class="mlr"><b>BPOM RI ML'+(m.nb?' '+esc(m.nb):'')+'</b></div>'
    +L('Diproduksi Oleh',m.dp)+L('Diimpor Oleh',m.di)
    +'<div class="mlx">'+esc(m.pr)+'</div></div></div>';
@@ -1953,7 +1993,7 @@ async function mlStdDownload(it,btn){
 }
 function mlRead(){const o={};$('ml_form').querySelectorAll('[data-m]').forEach(e=>o[e.dataset.m]=e.type==='checkbox'?(e.checked?1:0):e.isContentEditable?rtClean(e.innerHTML).trim():e.value.trim());return o}
 function mlUpd(){
-  const m=mlRead(),n=MLREQ.filter(k=>m[k]||(k==='alk'&&m.ka===0)).length,ai=$('ml_form').querySelector('input[data-m="alk"]');if(ai){ai.disabled=m.ka===0;ai.style.opacity=m.ka===0?.5:''}
+  const m=mlRead(),n=MLREQ.filter(k=>m[k]||mlOff(m,k)).length,ai=$('ml_form').querySelector('input[data-m="alk"]');if(ai){ai.disabled=m.ka===0;ai.style.opacity=m.ka===0?.5:''}[['kt','kk'],['bg','kb']].forEach(a=>{const e=$('ml_form').querySelector('input[data-m="'+a[0]+'"]');if(e){e.disabled=m[a[1]]===0;e.style.opacity=m[a[1]]===0?.5:''}});
   $('ml_cnt').textContent=n+' dari '+MLREQ.length+' kolom terisi';
   $('ml_prev').innerHTML=mlComplete(m)?'<div style="max-width:420px;margin:0 auto">'+mlHTML(m,true,null,true)+'</div>':'<div class="cnt">Preview muncul setelah semua kolom terisi. </div>';mlFit($('ml_prev'));
 }
@@ -1976,7 +2016,7 @@ function openML(id){
   const it=curIt(),x=it&&it.docs.find(z=>z.id===id);if(!x)return;
   mlId=id;const m=mlFix(it,Object.assign(mlDef(it),x.ml||{}));if(it.lg&&!x.ml){const L0=(it.reg&&it.reg.d&&it.reg.d.lab)||(it.nie&&it.nie.lab)||{};['nm','sn','ib','nb','dp','di','kp'].forEach(k=>{if(L0[k])m[k]=L0[k]});if(L0.al)m.alk=L0.al}if(it.perub&&!x.mlSaved){const og=items.find(z=>z.id===it.perubOf),L1=(og&&og.nie&&og.nie.lab)||{};if(L1.kp)m.kp=L1.kp;if(L1.dp)m.dp=L1.dp}if(!String(m.di||'').trim()&&CO().nm)m.di=CO().nm;
   $('ml_dlg').classList.add('xl');$('ml_g').classList.add('rv');const ka=!(m.ka===0||m.ka==='0');
-  $('ml_form').innerHTML=MLF.map(f=>f[0]==='alk'?'<div><label>'+f[1]+'</label><input data-m="alk" value="'+esc(m.alk||'')+'"><label class="cnt" style="display:flex;gap:6px;align-items:center;margin:6px 0 0;cursor:pointer"><input type="checkbox" data-m="ka"'+(ka?' checked':'')+' style="width:auto"> Tampilkan keterangan \u201cMengandung Alkohol \u00b1'+esc(m.alk||'..')+'% v/v\u201d di label</label></div>':f[0]==='kp'?'<div style="grid-column:1/-1"><label>'+f[1]+'</label>'+rtEd(m.kp,'data-m="kp"',0,1)+'</div>':f[2]==='ta'?'<div style="grid-column:1/-1"><label>'+f[1]+'</label><textarea rows="2" data-m="'+f[0]+'">'+esc(m[f[0]]||'')+'</textarea></div>':'<div><label>'+f[1]+'</label><input data-m="'+f[0]+'" value="'+esc(m[f[0]]||'')+'"></div>').join('');
+  $('ml_form').innerHTML=MLF.map(f=>f[0]==='alk'?'<div><label>'+f[1]+'</label><input data-m="alk" value="'+esc(m.alk||'')+'"><label class="cnt" style="display:flex;gap:6px;align-items:center;margin:6px 0 0;cursor:pointer"><input type="checkbox" data-m="ka"'+(ka?' checked':'')+' style="width:auto"> Tampilkan keterangan \u201cMengandung Alkohol \u00b1'+esc(m.alk||'..')+'% v/v\u201d di label</label></div>':f[0]==='kt'?'<div><label>'+f[1]+'</label><input data-m="kt" value="'+esc(m.kt||'')+'"><label class="cnt" style="display:flex;gap:6px;align-items:center;margin:6px 0 0;cursor:pointer"><input type="checkbox" data-m="kk"'+(m.kk===0||m.kk==='0'?'':' checked')+' style="width:auto"> Tampilkan “Kode &amp; Tanggal Produksi” di label</label><div style="margin-top:10px"><label>Judul kotak tambahan (isi sendiri, opsional)</label><input data-m="xj" value="'+esc(m.xj||'')+'" placeholder="mis. Negara Asal"><label style="margin-top:6px">Isi kotak tambahan</label><input data-m="xi" value="'+esc(m.xi||'')+'"><label style="margin-top:6px">Letakkan di bawah baris</label><select data-m="xp">'+[['ib','Isi Bersih'],['al','Mengandung Alkohol'],['kt','Kode &amp; Tanggal Produksi'],['bg','Baik digunakan sebelum'],['kp','Komposisi'],['nb','BPOM RI ML'],['dp','Diproduksi Oleh'],['di','Diimpor Oleh']].map(o=>'<option value="'+o[0]+'"'+((m.xp||'kt')===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></div></div>':f[0]==='bg'?'<div><label>'+f[1]+'</label><input data-m="bg" value="'+esc(m.bg||'')+'"><label class="cnt" style="display:flex;gap:6px;align-items:center;margin:6px 0 0;cursor:pointer"><input type="checkbox" data-m="kb"'+(m.kb===0||m.kb==='0'?'':' checked')+' style="width:auto"> Tampilkan “Baik digunakan sebelum” di label</label></div>':f[0]==='kp'?'<div style="grid-column:1/-1"><label>'+f[1]+'</label>'+rtEd(m.kp,'data-m="kp"',0,1)+'</div>':f[2]==='ta'?'<div style="grid-column:1/-1"><label>'+f[1]+'</label><textarea rows="2" data-m="'+f[0]+'">'+esc(m[f[0]]||'')+'</textarea></div>':'<div><label>'+f[1]+'</label><input data-m="'+f[0]+'" value="'+esc(m[f[0]]||'')+'"></div>').join('');
   $('ml_title').textContent=x.n+' \u2014 '+it.nama;mlUpd();$('mo3').style.display='flex';mlFit($('ml_prev'));
 }
 function closeML(){$('mo3').style.display='none';mlId=null;if(revMode){if(lbId)lbRender();else revEnd()}else{render2();if(lbId)lbRender()}}
