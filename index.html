@@ -497,7 +497,7 @@ async function pull(){
   else if(items.length||d.includes('items')){await push('items')}
   if(m.logo!==undefined&&!d.includes('logo')){LOGO={src:'',l:25,t:25,w:50,o:.35,lock:false};Object.assign(LOGO,m.logo);try{localStorage.setItem(LK,JSON.stringify(LOGO))}catch(e){}}
   else if(LOGO.src||LOGO.co||d.includes('logo')){await push('logo')}
-  if(any(LOGO,isRef)){setSyn('Memuat logo…');await hydrate(LOGO)}
+  if(any(LOGO,isRef)){setSyn('Memuat logo…');try{await hydrate(LOGO)}catch(e){walk(LOGO,v=>isRef(v)?'':undefined);try{localStorage.setItem(LK,JSON.stringify(LOGO))}catch(e2){}await push('logo')}}
   try{await hydrateQr()}catch(e){}
   if(any(items,v=>isDU(v)&&!UP.has(v)))await push('items');
   if(any(LOGO,v=>isDU(v)&&!UP.has(v)))await push('logo');
