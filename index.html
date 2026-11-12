@@ -512,7 +512,7 @@ async function sync(){
     await pull();cloudReady=true;
     synOk();
     const act=document.querySelector('.tabs .tab.on');go(act?act.dataset.t:'1');
-  }catch(e){cloudReady=false;setSyn('Offline atau gagal terhubung. Memakai data di perangkat ini. Ketuk untuk coba lagi.',true)}
+  }catch(e){cloudReady=false;console.error('sync',e);setSyn('Offline atau gagal terhubung'+(e&&e.message?' ('+String(e.message).slice(0,90)+')':'')+'. Memakai data di perangkat ini. Ketuk untuk coba lagi.',true)}
 }
 function showAuth(){$('mo_auth').style.display='flex';$('au_m').textContent='';setTimeout(()=>$('au_e').focus(),50)}
 async function doLogin(){
@@ -591,7 +591,7 @@ function vis(){
 }
 function render(){
   const nP=items.filter(i=>!hid(i)&&isP(i)).length;
-  $('sbd').innerHTML='Daftar ('+(items.filter(i=>!hid(i)).length-nP)+')'+(items.filter(i=>!hid(i)).length-nP>0?'<span class="rd" title="Masih ada barang di Daftar"></span>':'');const noCoa=items.filter(i=>!hid(i)&&isP(i)).some(i=>{const x=coaOf(i);return !(x&&x.fd)});
+  $('sbd').innerHTML='Daftar Barang ('+(items.filter(i=>!hid(i)).length-nP)+')'+(items.filter(i=>!hid(i)).length-nP>0?'<span class="rd" title="Masih ada barang di Daftar"></span>':'');const noCoa=items.filter(i=>!hid(i)&&isP(i)).some(i=>{const x=coaOf(i);return !(x&&x.fd)});
   $('sbp').innerHTML='Proses Analisis ('+nP+')'+(noCoa?'<span class="rd" title="Masih ada barang yang file COA-nya belum diunggah"></span>':'');
   $('sbd').classList.toggle('on',sbMode==='d');$('sbp').classList.toggle('on',sbMode==='p');
   const list=vis();
@@ -1641,7 +1641,7 @@ function renderP(){
   });
   rows.sort((a,b)=>a.n.localeCompare(b.n));
   const MS={d:'',p:'Diajukan',a:'Disetujui'},cn=m=>rows.filter(r=>r.a===MS[m]).length;
-  [['d','Daftar'],['p','Proses'],['a','Disetujui']].forEach(([m,t])=>{const e=$('p3'+m);e.classList.toggle('on',pMode===m);e.innerHTML=t+(m==='d'?'':' ('+cn(m)+')')+(m!=='a'&&cn(m)>0?'<span class="rd" title="Masih ada pabrik di sini"></span>':'')});
+  [['d','Daftar Pabrik'],['p','Proses'],['a','Disetujui']].forEach(([m,t])=>{const e=$('p3'+m);e.classList.toggle('on',pMode===m);e.innerHTML=t+(m==='d'?'':' ('+cn(m)+')')+(m!=='a'&&cn(m)>0?'<span class="rd" title="Masih ada pabrik di sini"></span>':'')});
   const nm=v=>norm(v);
   rows.forEach(r=>{r.fn=null;r.fa=null;if(r.a)return;rows.forEach(o=>{if(o===r||!o.a)return;const st=o.a==='Diajukan'?'Proses':'Disetujui';if(nm(r.fc.n)&&nm(r.fc.n)===nm(o.fc.n))r.fn=(r.fn?r.fn+'; ':'')+st+': '+(o.fc.n||'')+' / '+(o.fc.a||'');if(nm(r.fc.a)&&nm(r.fc.a)===nm(o.fc.a))r.fa=(r.fa?r.fa+'; ':'')+st+': '+(o.fc.n||'')+' / '+(o.fc.a||'')})});
   rows=rows.filter(r=>r.a===MS[pMode]);
