@@ -127,6 +127,7 @@ input[type=color]{width:34px;height:26px;padding:0;border:0;background:none;curs
 .std .sq{position:relative;width:calc(var(--bq,18cqw)*var(--k,1));height:calc(var(--bq,18cqw)*var(--k,1));flex:none;display:flex;align-items:center;justify-content:center}
 .std .sq img{width:100%;height:100%;object-fit:contain;display:block}
 .std .sph{font-size:2.6cqw;text-align:center;border:1px solid #000;width:100%;height:100%;display:flex;align-items:center;justify-content:center;line-height:1.1;box-sizing:border-box}
+.std .sqw{position:relative;flex:none;display:flex}
 .std .sbp{position:absolute;left:-2cqw;right:-2cqw;bottom:100%;margin-bottom:.8cqw;text-align:center;font-size:calc(2.7cqw*var(--k,1));line-height:1}
 .std .sm{flex:1;min-width:0;padding:0;text-align:center}
 .std .s1{font-weight:700;overflow-wrap:break-word;font-size:calc(3.8cqw*var(--ts,1)*var(--k,1)*var(--fit,1));line-height:1.2;margin-top:.5cqw;text-wrap:balance}
@@ -1971,7 +1972,7 @@ function mlHTML(m,ed,qr,showBc,noBc){
     };
     const TX=(k,v)=>{const c=String((EL[k]||{}).cap||'').trim();return c?esc(c):esc(v)},CP=(k,a)=>{const c=String((EL[k]||{}).cap||'').trim();return c?esc(c):a},R=(k,a,b)=>'<div class="sr"'+at(k)+'><b class="sl">'+CP(k,a)+' :</b> '+esc(b).replace(/\n/g,'<br>')+'</div>';
     const bg=String(m.bg||'').trim(),showBg=!!bg;
-    const bxB='<div class="sq"'+at('bc')+'>'+bc+'</div>',bxQ='<div class="sq"'+at('qr')+'><span class="sbp"'+at('bp')+'>'+TX('bp','BPOM RI')+'</span>'+q2+'</div>';
+    const bxB='<div class="sq"'+at('bc')+'>'+bc+'</div>',bxQ='<div class="sqw"><span class="sbp"'+at('bp')+'>'+TX('bp','BPOM RI')+'</span><div class="sq"'+at('qr')+'>'+q2+'</div></div>';
     const XS=xpk(m).filter(a=>String(a.i).trim()).map(a=>({p:a.p,h:'<div class="sr" data-xb="1" style="position:relative;margin:.5cqw 0"><b class="sl">'+esc(String(a.j).trim()||'Keterangan')+' :</b> '+esc(a.i).replace(/\n/g,'<br>')+'</div>'})),P=(k,h)=>h+XS.filter(a=>a.p===k).map(a=>a.h).join('');
     const sty='--fs:'+f.fs/100+';--fw:'+f.fs/100+';--ts:'+f.ts/100+';--cs:'+(f.cs||100)/100+';--bq:'+f.bq+'cqw;--ar:'+(f.h/f.w)+';--gp:'+(0.3/(f.w*10)*100)+'cqw;--lh:'+f.lh+';--ff:'+(FFM[f.ff]||FFM.Arial)+LFMG.map(a=>(f[a[0]]!==undefined&&f[a[0]]!==null&&f[a[0]]!=='')?';--'+a[1]+':'+(f[a[0]]/(f.w*10)*100)+'cqw':'').join('')+(f.bd?';border:1px solid #000':'');
     return '<div class="mlw"><div class="ml std" style="'+sty+'">'+g0
