@@ -198,7 +198,7 @@ input[type=color]{width:34px;height:26px;padding:0;border:0;background:none;curs
 <body>
 <div class="wrap">
   <h1>Asisten Registrasi BPOM</h1>
-  <p class="sub"><span id="syn">Memuat…</span> <a href="#" id="lout" style="display:none;margin-left:8px">Keluar</a> <span style="margin-left:8px;opacity:.5;font-size:11px">v12nov-d</span></p>
+  <p class="sub"><span id="syn">Memuat…</span> <a href="#" id="lout" style="display:none;margin-left:8px">Keluar</a> <span style="margin-left:8px;opacity:.5;font-size:11px">v12nov-e</span></p>
   <div class="tabs">
     <div class="tab on" data-t="1">1. Pencatatan Barang</div>
     <div class="tab" data-t="2">2. Kelengkapan Dokumen</div>
@@ -594,7 +594,9 @@ function makeSb(){
     }},
     storage:{from(b){return{
       async upload(p,blob,o){try{await call('/storage/v1/object/'+b+'/'+p,{method:'POST',headers:{'Content-Type':o.contentType,'x-upsert':o.upsert?'true':'false'},body:blob});return{error:null}}catch(e){return{error:e}}},
-      async download(p){try{const r=await call('/storage/v1/object/authenticated/'+b+'/'+p);return{data:await r.blob(),error:null}}catch(e){return{data:null,error:e}}}
+      async download(p){try{const r=await call('/storage/v1/object/authenticated/'+b+'/'+p);return{data:await r.blob(),error:null}}catch(e){return{data:null,error:e}}},
+      async copy(f,t){try{await call('/storage/v1/object/copy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bucketId:b,sourceKey:f,destinationKey:t})});return{error:null}}catch(e){return{error:e}}},
+      async remove(a){try{await call('/storage/v1/object/'+b,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({prefixes:a})});return{error:null}}catch(e){return{error:e}}}
     }}}
   };
 }
