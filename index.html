@@ -198,7 +198,7 @@ input[type=color]{width:34px;height:26px;padding:0;border:0;background:none;curs
 <body>
 <div class="wrap">
   <h1>Asisten Registrasi BPOM</h1>
-  <p class="sub"><span id="syn">Memuat…</span> <a href="#" id="lout" style="display:none;margin-left:8px">Keluar</a> <span style="margin-left:8px;opacity:.5;font-size:11px">v12nov-c</span></p>
+  <p class="sub"><span id="syn">Memuat…</span> <a href="#" id="lout" style="display:none;margin-left:8px">Keluar</a> <span style="margin-left:8px;opacity:.5;font-size:11px">v12nov-d</span></p>
   <div class="tabs">
     <div class="tab on" data-t="1">1. Pencatatan Barang</div>
     <div class="tab" data-t="2">2. Kelengkapan Dokumen</div>
@@ -453,7 +453,7 @@ async function relocate(){
       moved.add(j.old);
     }
     if(fail)RELO_ERR='salin: '+fail.slice(0,80);
-    if(!moved.size)return;
+    if(!moved.size)return false;
     try{localStorage.setItem(KEY,JSON.stringify(items))}catch(e){}
     const left=refsNow(),gone=[...moved].filter(o=>!left.has(o));
     if(gone.length){
@@ -462,7 +462,8 @@ async function relocate(){
       for(const [k,v] of [...UPF])if(gs.has(v))UPF.delete(k);
       for(const [k,v] of [...UP])if(gs.has(v))UP.delete(k);
     }
-  }catch(e){RELO_ERR=String(e&&e.message||e).slice(0,80);console.error('relocate',e)}
+    return true;
+  }catch(e){RELO_ERR=String(e&&e.message||e).slice(0,80);console.error('relocate',e);return false}
 }
 async function upFile(du,path){
   const m=(du.match(/^data:([^;,]+)/)||[])[1]||'application/octet-stream';
@@ -529,6 +530,7 @@ async function pull(){
   else if(LOGO.src||LOGO.co||d.includes('logo')){await push('logo')}
   if(any(LOGO,isRef)){setSyn('Memuat logo…');try{await hydrate(LOGO)}catch(e){walk(LOGO,v=>isRef(v)?'':undefined);try{localStorage.setItem(LK,JSON.stringify(LOGO))}catch(e2){}await push('logo')}}
   try{await hydrateQr()}catch(e){}
+  try{if(await relocate())await push('items')}catch(e){}
   if(any(items,v=>isDU(v)&&!UP.has(v)))await push('items');
   if(any(LOGO,v=>isDU(v)&&!UP.has(v)))await push('logo');
 }
@@ -541,6 +543,7 @@ async function sync(){
     setSyn('Menyinkronkan…');
     await pull();cloudReady=true;
     synOk();
+    if(RELO_ERR){setSyn('Tersimpan, tetapi file gagal dipindah ('+RELO_ERR+')',true);RELO_ERR=''}
     const act=document.querySelector('.tabs .tab.on');go(act?act.dataset.t:'1');
   }catch(e){cloudReady=false;console.error('sync',e);setSyn('Offline atau gagal terhubung'+(e&&e.message?' ('+String(e.message).slice(0,90)+')':'')+'. Memakai data di perangkat ini. Ketuk untuk coba lagi.',true)}
 }
