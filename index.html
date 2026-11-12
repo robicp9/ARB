@@ -409,41 +409,60 @@ function walkRef(o,cb,par,key){
   if(Array.isArray(o))o.forEach((v,i)=>walkRef(v,cb,o,i));
   else if(o&&typeof o==='object'){for(const k in o)walkRef(o[k],cb,o,k)}
 }
+function walkAll(o,cb,par,key){
+  if(typeof o==='string'){cb(o,par,key);return}
+  if(Array.isArray(o))o.forEach((v,i)=>walkAll(v,cb,o,i));
+  else if(o&&typeof o==='object'){for(const k in o)walkAll(o[k],cb,o,k)}
+}
+let RELO_ERR='';
+function refsNow(){
+  const st=new Set();
+  items.forEach(it=>walkAll(it,v=>{if(isRef(v))st.add(v.slice(5));else if(isDU(v)){const r=UPH.get(v);if(r)st.add(r.slice(5))}}));
+  return st;
+}
 async function relocate(){
   try{
     if(!sb||!suid||!Array.isArray(items))return;
     const jobs=[];
-    items.forEach(it=>walkRef(it,(ref,par,k)=>{
+    items.forEach(it=>walkAll(it,(v,par,k)=>{
+      const ref=isRef(v)?v:(isDU(v)?UPH.get(v):'');
+      if(!ref)return;
       const old=ref.slice(5),i=old.lastIndexOf('/'),dir=dirOf(it,par);
       if(i<0||!old.startsWith(suid+'/')||old.slice(0,i)===dir)return;
-      jobs.push({par,k,old,dir,nm:old.slice(i+1)});
+      jobs.push({par,k,v,old,i,dir});
     }));
     if(!jobs.length)return;
-    const all=new Set();items.forEach(it=>walkRef(it,r=>all.add(r.slice(5))));
-    const made=new Map(),moved=new Set();let n=0;
+    const all=refsNow(),made=new Map(),moved=new Set();let n=0,fail='';
     for(const j of jobs){
       const key=j.old+'|'+j.dir;let to=made.get(key);
       if(!to){
-        const e=(j.nm.match(/\.[^.]*$/)||[''])[0],b=j.nm.slice(0,j.nm.length-e.length);
+        const nm=j.old.slice(j.i+1),e=(nm.match(/\.[^.]*$/)||[''])[0],b=nm.slice(0,nm.length-e.length);
         setSyn('Memindahkan file '+(++n)+'/'+jobs.length+'…');
-        let c=1,p=j.dir+'/'+j.nm;
+        let c=1,p=j.dir+'/'+nm;
         for(let t=0;t<6;t++){
           while(all.has(p)){c++;p=j.dir+'/'+b+' ('+c+')'+e}
           const r=await sb.storage.from(BUCKET).copy(j.old,p);
           if(!r.error){to=p;break}
+          fail=String(r.error.message||r.error);
           c++;p=j.dir+'/'+b+' ('+c+')'+e;
         }
         if(!to)continue;
         all.add(to);made.set(key,to);
       }
-      j.par[j.k]='sb://'+to;moved.add(j.old);
+      if(isRef(j.v))j.par[j.k]='sb://'+to;else UPH.set(j.v,'sb://'+to);
+      moved.add(j.old);
     }
+    if(fail)RELO_ERR='salin: '+fail.slice(0,80);
     if(!moved.size)return;
     try{localStorage.setItem(KEY,JSON.stringify(items))}catch(e){}
-    const left=new Set();items.forEach(it=>walkRef(it,r=>left.add(r.slice(5))));
-    const gone=[...moved].filter(o=>!left.has(o));
-    if(gone.length){try{await sb.storage.from(BUCKET).remove(gone)}catch(e){}}
-  }catch(e){console.error('relocate',e)}
+    const left=refsNow(),gone=[...moved].filter(o=>!left.has(o));
+    if(gone.length){
+      try{const rm=await sb.storage.from(BUCKET).remove(gone);if(rm&&rm.error)RELO_ERR='hapus: '+String(rm.error.message||rm.error).slice(0,80)}catch(e){RELO_ERR='hapus: '+String(e&&e.message||e).slice(0,80)}
+      const gs=new Set(gone.map(g=>'sb://'+g));
+      for(const [k,v] of [...UPF])if(gs.has(v))UPF.delete(k);
+      for(const [k,v] of [...UP])if(gs.has(v))UP.delete(k);
+    }
+  }catch(e){RELO_ERR=String(e&&e.message||e).slice(0,80);console.error('relocate',e)}
 }
 async function upFile(du,path){
   const m=(du.match(/^data:([^;,]+)/)||[])[1]||'application/octet-stream';
@@ -456,7 +475,7 @@ async function upFile(du,path){
 async function toCloud(val){
   const snap=JSON.parse(JSON.stringify(val)),todo=new Map();
   const each=cb=>{if(Array.isArray(snap))snap.forEach(it=>walkCtx(it,(du,p,k)=>cb(it,du,p,k)));else walkCtx(snap,(du,p,k)=>cb(null,du,p,k))};
-  each((it,du,p,k)=>{const d=dirOf(it,p),key=d+'|'+du;if(!UPF.has(key)&&!UPH.has(du)&&!todo.has(key))todo.set(key,{d,du,nm:fnOf(p&&p.fn,k,du)})});
+  each((it,du,p,k)=>{const d=dirOf(it,p),key=d+'|'+du;if(!UPF.has(key)&&!UPH.has(du)&&!todo.has(key))todo.set(key,{d,du,k,nm:fnOf(p&&p.fn,k,du)})});
   const used=new Set([...UP.values(),...UPF.values()].map(v=>v.slice(5)));
   walkRef(snap,r=>used.add(r.slice(5)));
   let n=0;
@@ -465,7 +484,7 @@ async function toCloud(val){
     const dot=t.nm.lastIndexOf('.'),b=t.nm.slice(0,dot),e=t.nm.slice(dot);
     let p=t.d+'/'+t.nm,c=1;while(used.has(p)){c++;p=t.d+'/'+b+' ('+c+')'+e}
     try{await upFile(t.du,p)}catch(err){p=await upFile(t.du)}
-    used.add(p);UPF.set(key,'sb://'+p);
+    used.add(p);UPF.set(key,'sb://'+p);if(t.k==='qr')UPH.set(t.du,'sb://'+p);
   }
   each((it,du,p,k)=>{const r=UPF.get(dirOf(it,p)+'|'+du)||UPH.get(du);if(r)p[k]=r});
   return snap;
@@ -485,6 +504,8 @@ async function push(k){
     if(r.error)throw r.error;
     if(VER[k]===v)setDirty(k,false);
     synOk();ok=true;
+    if(k==='items'){try{items.forEach(it=>walkCtx(it,(du,p,key)=>{if(key==='qr')return;const r=UPF.get(dirOf(it,p)+'|'+du);if(r)p[key]=r}))}catch(e){}}
+    if(RELO_ERR){setSyn('Tersimpan, tetapi file gagal dipindah ('+RELO_ERR+')',true);RELO_ERR=''}
   }catch(e){setSyn('Gagal menyimpan ke cloud. Data aman di perangkat ini. Ketuk untuk coba lagi.',true)}
   finally{const again=BUSY[k]===2;BUSY[k]=0;if(again&&ok)push(k)}
   return ok;
