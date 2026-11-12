@@ -208,7 +208,7 @@ input[type=color]{width:34px;height:26px;padding:0;border:0;background:none;curs
     <div class="tab" data-t="7">7. Data Perusahaan</div>
   </div>
   <div id="v1">
-  <div class="subtabs"><div class="tab on" data-sb="d" id="sbd">Daftar</div><div class="tab" data-sb="p" id="sbp">Proses Analisis</div></div>
+  <div class="subtabs"><div class="tab on" data-sb="d" id="sbd">Daftar Barang</div><div class="tab" data-sb="p" id="sbp">Proses Analisis</div></div>
   <div class="card">
     <div class="row" style="margin-top:0">
       <input id="cari" placeholder="Cari barang, principal, pabrik, PIC, atau tanggal pengajuan…" style="max-width:320px">
@@ -236,20 +236,20 @@ input[type=color]{width:34px;height:26px;padding:0;border:0;background:none;curs
   </div>
 
   <div id="v3" style="display:none">
-    <div class="subtabs" id="sb3"><div class="tab on" data-p3="d" id="p3d">Daftar</div><div class="tab" data-p3="p" id="p3p">Proses</div><div class="tab" data-p3="a" id="p3a">Disetujui</div></div>
+    <div class="subtabs" id="sb3"><div class="tab on" data-p3="d" id="p3d">Daftar Pabrik</div><div class="tab" data-p3="p" id="p3p">Proses</div><div class="tab" data-p3="a" id="p3a">Disetujui</div></div>
     <div class="card">
-      <div class="row" style="margin-top:0"><b>PABRIK</b><span class="cnt" id="pcnt"></span><span class="sp"></span><select id="pflt" style="width:auto"><option value="">Semua</option><option>Siap</option><option>Belum</option></select></div>
-      <div class="cnt" style="margin-top:6px">Satu baris = satu pabrik (nama + alamat dari tab 1; yang sama digabung jadi satu). Siap = minimal satu barang dari pabrik tersebut sudah Lengkap di LOA, CFS, dan NKV / HACCP / ISO. Kolom dokumen menampilkan nama dan alamat yang diisi di Kelengkapan Dokumen.</div>
+      <div class="row" style="margin-top:0"><b>PABRIK</b><span class="cnt" id="pcnt"></span><span class="sp"></span><select id="pflt" style="width:auto"><option value="">Semua</option><option>Lengkap</option><option>Belum Lengkap</option></select></div>
+      <div class="cnt" style="margin-top:6px">Satu baris = satu pabrik (nama + alamat dari tab 1; yang sama digabung jadi satu). Lengkap = minimal satu barang dari pabrik tersebut sudah terisi lengkap di LOA, CFS, dan NKV / HACCP / ISO. Kolom dokumen menampilkan nama dan alamat yang diisi di Kelengkapan Dokumen.</div>
       <div class="tw" style="margin-top:10px"><table id="tp"><thead><tr><th>Pabrik (Label)</th><th>Barang</th><th>LOA</th><th>LOE</th><th>CFS</th><th>NKV / HACCP / ISO</th><th>Status</th><th>Action</th></tr></thead><tbody id="tbp"></tbody></table></div>
     </div>
   </div>
 
   <div id="v4" style="display:none">
-    <div class="card"><div class="row" style="margin-top:0"><b>List Barang</b><span class="cnt" id="c4"></span><button class="p" id="ex4" style="margin-left:auto">Ekspor</button></div><div class="cnt" style="margin-top:6px">Hanya barang dengan kelengkapan data minimal 90% dan proses pabrik Siap + Disetujui.</div><div id="l4" style="margin-top:8px"></div></div>
+    <div class="card"><div class="row" style="margin-top:0"><b>Daftar Barang</b><span class="cnt" id="c4"></span><button class="p" id="ex4" style="margin-left:auto">Ekspor</button></div><div class="cnt" style="margin-top:6px">Hanya barang dengan kelengkapan data minimal 90% dan pabrik berstatus Lengkap + Disetujui.</div><div id="l4" style="margin-top:8px"></div></div>
   </div>
 
   <div id="v5" style="display:none">
-    <div class="card"><div class="row" style="margin-top:0"><b>List Barang</b><span class="cnt" id="c5"></span><button class="p" id="nie_bulk" style="margin-left:auto" title="Pilih banyak file NIE sekaligus. Nama file harus memuat nomor pengajuan">Unggah banyak NIE</button><input type="file" id="nie_multi" multiple accept="application/pdf,image/*" hidden><button id="nie_old" title="Unggah banyak NIE RBA (yang terbit sebelum aplikasi ini dipakai). Barang dibuat otomatis dari isi file dan tetap di tab 5 sampai Anda klik Simpan">Unggah NIE RBA</button><input type="file" id="nie_oldf" multiple accept="application/pdf,image/*" hidden><button id="nie_ereg" title="Unggah banyak NIE EREG (izin edar model lama dari e-Reg, ada kop Badan POM). Barang dibuat otomatis dari isi file dan tetap di tab 5 sampai Anda klik Simpan">Unggah NIE EREG</button><input type="file" id="nie_eregf" multiple accept="application/pdf,image/*" hidden></div><div class="cnt" id="nie_bm" style="margin-top:6px"></div><div class="cnt" style="margin-top:6px">Barang yang sudah diajukan dari tab SPB BPOM.</div><div id="l5" style="margin-top:8px"></div></div>
+    <div class="card"><div class="row" style="margin-top:0"><b>Daftar Barang</b><span class="cnt" id="c5"></span><button class="p" id="nie_bulk" style="margin-left:auto" title="Pilih banyak file NIE sekaligus. Nama file harus memuat nomor pengajuan">Unggah banyak NIE</button><input type="file" id="nie_multi" multiple accept="application/pdf,image/*" hidden><button id="nie_old" title="Unggah banyak NIE RBA (yang terbit sebelum aplikasi ini dipakai). Barang dibuat otomatis dari isi file dan tetap di tab 5 sampai Anda klik Simpan">Unggah NIE RBA</button><input type="file" id="nie_oldf" multiple accept="application/pdf,image/*" hidden><button id="nie_ereg" title="Unggah banyak NIE EREG (izin edar model lama dari e-Reg, ada kop Badan POM). Barang dibuat otomatis dari isi file dan tetap di tab 5 sampai Anda klik Simpan">Unggah NIE EREG</button><input type="file" id="nie_eregf" multiple accept="application/pdf,image/*" hidden></div><div class="cnt" id="nie_bm" style="margin-top:6px"></div><div class="cnt" style="margin-top:6px">Barang yang sudah diajukan dari tab SPB BPOM.</div><div id="l5" style="margin-top:8px"></div></div>
   </div>
 
   <div id="v6" style="display:none">
@@ -359,7 +359,7 @@ let sb=null,suid=null,cloudReady=false;const TM={},VER={items:0,logo:0};
 function setSyn(t,bad){const e=$('syn');if(e){e.textContent=t;e.style.color=bad?'var(--dg)':''}}
 function getDirty(){try{return JSON.parse(localStorage.getItem(DK)||'[]')}catch(e){return[]}}
 function setDirty(k,on){try{const d=getDirty().filter(x=>x!==k);if(on)d.push(k);localStorage.setItem(DK,JSON.stringify(d))}catch(e){}}
-const BUCKET='arb-files',UP=new Map(),RD=new Map(),BUSY={};
+const BUCKET='arb-files',UP=new Map(),RD=new Map(),UPF=new Map(),UPH=new Map(),BUSY={};
 const EXT={'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif','application/pdf':'pdf'};
 const isDU=v=>typeof v==='string'&&v.startsWith('data:')&&v.length>500,isRef=v=>typeof v==='string'&&v.startsWith('sb://');
 function walk(o,f){if(Array.isArray(o)){o.forEach((v,i)=>{const r=f(v);if(r!==undefined)o[i]=r;else walk(v,f)})}else if(o&&typeof o==='object'){for(const k in o){const v=o[k],r=f(v);if(r!==undefined)o[k]=r;else walk(v,f)}}}
@@ -370,21 +370,95 @@ async function dlRef(ref){const r=await sb.storage.from(BUCKET).download(ref.sli
 async function getBlob(v){return isRef(v)?await dlRef(v):d2b(v)}
 async function hydrate(o){
   const refs=new Set();walk(o,v=>{if(isRef(v))refs.add(v)});
-  for(const ref of refs){if(!RD.has(ref)){const du=await blob2du(await dlRef(ref));RD.set(ref,du);UP.set(du,ref)}}
+  for(const ref of refs){if(!RD.has(ref)){const du=await blob2du(await dlRef(ref));RD.set(ref,du);UP.set(du,ref);UPH.set(du,ref)}}
   walk(o,v=>isRef(v)?RD.get(v):undefined);
 }
-async function upFile(du){
+function walkCtx(o,cb,par,key){
+  if(typeof o==='string'){if(isDU(o))cb(o,par,key);return}
+  if(Array.isArray(o))o.forEach((v,i)=>walkCtx(v,cb,o,i));
+  else if(o&&typeof o==='object'){for(const k in o)walkCtx(o[k],cb,o,k)}
+}
+function sg(s,fb,max){
+  s=String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/&/g,' dan ').replace(/,/g,'').replace(/[^A-Za-z0-9 ._()-]+/g,'_').replace(/\s+/g,' ').replace(/_{2,}/g,'_').slice(0,max||80).replace(/^[ ._]+|[ ._]+$/g,'');
+  return s||fb;
+}
+function dirOf(it,par){
+  if(!it)return suid+'/_umum';
+  const lb=(it.nie&&it.nie.lab&&it.nie.lab.dp)||(it.reg&&it.reg.d&&it.reg.d.lab&&it.reg.d.lab.dp)||'';
+  const a=[suid,sg(it.prin,'No Principal'),sg(it.pab||String(lb).split('\n')[0],'Tanpa Pabrik')];
+  if(!(par&&['LOA / Surat Penunjukan','LOE / Surat Pernyataan','CFS / Health Certificate','NKV, HACCP, ISO'].includes(par.n)))a.push(sg([it.nama,it.njenis].filter(Boolean).join(' - '),'Tanpa Nama',100));
+  return a.join('/');
+}
+function fnOf(fn,k,du){
+  const m=(du.match(/^data:([^;,]+)/)||[])[1]||'',ext=EXT[m]||'bin';
+  let b=String(fn||'').split(/[\\/]/).pop(),d=b.lastIndexOf('.');
+  if(d>0&&/^[A-Za-z0-9]{2,5}$/.test(b.slice(d+1)))b=b.slice(0,d);
+  return sg(b,String(k)+'-'+h53(du).toString(36),100)+'.'+ext;
+}
+function walkRef(o,cb,par,key){
+  if(typeof o==='string'){if(isRef(o))cb(o,par,key);return}
+  if(Array.isArray(o))o.forEach((v,i)=>walkRef(v,cb,o,i));
+  else if(o&&typeof o==='object'){for(const k in o)walkRef(o[k],cb,o,k)}
+}
+async function relocate(){
+  try{
+    if(!sb||!suid||!Array.isArray(items))return;
+    const jobs=[];
+    items.forEach(it=>walkRef(it,(ref,par,k)=>{
+      const old=ref.slice(5),i=old.lastIndexOf('/'),dir=dirOf(it,par);
+      if(i<0||!old.startsWith(suid+'/')||old.slice(0,i)===dir)return;
+      jobs.push({par,k,old,dir,nm:old.slice(i+1)});
+    }));
+    if(!jobs.length)return;
+    const all=new Set();items.forEach(it=>walkRef(it,r=>all.add(r.slice(5))));
+    const made=new Map(),moved=new Set();let n=0;
+    for(const j of jobs){
+      const key=j.old+'|'+j.dir;let to=made.get(key);
+      if(!to){
+        const e=(j.nm.match(/\.[^.]*$/)||[''])[0],b=j.nm.slice(0,j.nm.length-e.length);
+        setSyn('Memindahkan file '+(++n)+'/'+jobs.length+'…');
+        let c=1,p=j.dir+'/'+j.nm;
+        for(let t=0;t<6;t++){
+          while(all.has(p)){c++;p=j.dir+'/'+b+' ('+c+')'+e}
+          const r=await sb.storage.from(BUCKET).copy(j.old,p);
+          if(!r.error){to=p;break}
+          c++;p=j.dir+'/'+b+' ('+c+')'+e;
+        }
+        if(!to)continue;
+        all.add(to);made.set(key,to);
+      }
+      j.par[j.k]='sb://'+to;moved.add(j.old);
+    }
+    if(!moved.size)return;
+    try{localStorage.setItem(KEY,JSON.stringify(items))}catch(e){}
+    const left=new Set();items.forEach(it=>walkRef(it,r=>left.add(r.slice(5))));
+    const gone=[...moved].filter(o=>!left.has(o));
+    if(gone.length){try{await sb.storage.from(BUCKET).remove(gone)}catch(e){}}
+  }catch(e){console.error('relocate',e)}
+}
+async function upFile(du,path){
   const m=(du.match(/^data:([^;,]+)/)||[])[1]||'application/octet-stream';
-  const path=suid+'/'+h53(du)+'-'+du.length.toString(36)+'.'+(EXT[m]||'bin');
+  if(!path)path=suid+'/'+h53(du)+'-'+du.length.toString(36)+'.'+(EXT[m]||'bin');
   const r=await sb.storage.from(BUCKET).upload(path,d2b(du),{contentType:m,upsert:true});
   if(r.error)throw r.error;
   UP.set(du,'sb://'+path);
+  return path;
 }
 async function toCloud(val){
-  const snap=JSON.parse(JSON.stringify(val)),todo=new Set();
-  walk(snap,v=>{if(isDU(v)&&!UP.has(v))todo.add(v)});
-  let n=0;for(const du of todo){setSyn('Mengunggah file '+(++n)+'/'+todo.size+'…');await upFile(du)}
-  walk(snap,v=>isDU(v)?UP.get(v):undefined);
+  const snap=JSON.parse(JSON.stringify(val)),todo=new Map();
+  const each=cb=>{if(Array.isArray(snap))snap.forEach(it=>walkCtx(it,(du,p,k)=>cb(it,du,p,k)));else walkCtx(snap,(du,p,k)=>cb(null,du,p,k))};
+  each((it,du,p,k)=>{const d=dirOf(it,p),key=d+'|'+du;if(!UPF.has(key)&&!UPH.has(du)&&!todo.has(key))todo.set(key,{d,du,nm:fnOf(p&&p.fn,k,du)})});
+  const used=new Set([...UP.values(),...UPF.values()].map(v=>v.slice(5)));
+  walkRef(snap,r=>used.add(r.slice(5)));
+  let n=0;
+  for(const [key,t] of todo){
+    setSyn('Mengunggah file '+(++n)+'/'+todo.size+'…');
+    const dot=t.nm.lastIndexOf('.'),b=t.nm.slice(0,dot),e=t.nm.slice(dot);
+    let p=t.d+'/'+t.nm,c=1;while(used.has(p)){c++;p=t.d+'/'+b+' ('+c+')'+e}
+    try{await upFile(t.du,p)}catch(err){p=await upFile(t.du)}
+    used.add(p);UPF.set(key,'sb://'+p);
+  }
+  each((it,du,p,k)=>{const r=UPF.get(dirOf(it,p)+'|'+du)||UPH.get(du);if(r)p[k]=r});
   return snap;
 }
 const synOk=()=>setSyn(getDirty().length?'Menyimpan…':'\u2713 Tersimpan di cloud');
@@ -396,6 +470,7 @@ async function push(k){
   if(BUSY[k]){BUSY[k]=2;return false}
   BUSY[k]=1;const v=VER[k];let ok=false;
   try{
+    if(k==='items')await relocate();
     const val=await toCloud(k==='items'?items:LOGO);
     const r=await sb.from('app_state').upsert({user_id:suid,key:k,value:val,updated_at:new Date().toISOString()},{onConflict:'user_id,key'});
     if(r.error)throw r.error;
@@ -409,7 +484,7 @@ async function hydrateQr(){
   const hold=[],refs=new Set();
   items.forEach(i=>[i.reg&&i.reg.d&&i.reg.d.lab,i.nie&&i.nie.lab].forEach(l=>{if(l&&isRef(l.qr)){hold.push(l);refs.add(l.qr)}}));
   for(const ref of refs){
-    if(!RD.has(ref)){try{const du=await blob2du(await dlRef(ref));RD.set(ref,du);UP.set(du,ref)}catch(e){}}
+    if(!RD.has(ref)){try{const du=await blob2du(await dlRef(ref));RD.set(ref,du);UP.set(du,ref);UPH.set(du,ref)}catch(e){}}
   }
   hold.forEach(l=>{const du=RD.get(l.qr);if(du)l.qr=du});
 }
@@ -749,7 +824,7 @@ function docsOf(it){
   let ch=false;
   if(!it.docs){it.docs=DEF.map(n=>({id:uid(),n,s:0}));it.dv=3;ch=true}
   else{
-    it.docs.forEach(x=>{if(REN[x.n]){x.n=REN[x.n];ch=true}});
+    it.docs.forEach(x=>{if(REN[x.n]){x.n=REN[x.n];ch=true}if(x.c&&x.s<2&&x.n!=='COA'&&x.n!==RML&&x.n!==RL&&(!['LOA / Surat Penunjukan','LOE / Surat Pernyataan','CFS / Health Certificate','NKV, HACCP, ISO'].includes(x.n)||(x.en&&x.ea&&(x.n!=='CFS / Health Certificate'||x.tt)))){x.s=2;ch=true}});
     if(it.dx&&it.dx.some(n=>REN[n])){it.dx=it.dx.map(n=>REN[n]||n);ch=true}
     if(it.dv!==3){
       if(!it.docs.some(x=>x.n===RML))it.docs.push({id:uid(),n:RML,s:0});
@@ -796,13 +871,13 @@ function render2(){
   const dt=v=>v?fmtD(v):'';
   const row=x=>{
     const coa=x.n==='COA',nm=coa?(x.cnm||''):(x.en||''),tt=x.tt||'',tb=coa?plus1y(x.tt):(x.tb||'');
-    const folder=(coa&&x.fd?'<div style="display:flex;gap:8px;align-items:center;justify-content:center"><a href="#" data-v="'+x.id+'">Lihat</a><button type="button" class="d" data-rf="'+x.id+'" title="Hapus file">hapus file</button></div>':'<div style="display:flex;gap:8px;align-items:center"><input type="text" data-lk="'+x.id+'" placeholder="Tempel Link" value="'+esc((x.lk||'').replace(/^https?:\/\//i,''))+'" style="flex:1;min-width:0">'+(x.lk?'<a href="'+esc(x.lk)+'" target="_blank" rel="noopener" style="white-space:nowrap;font-size:12px;font-weight:600">Buka</a>':'')+'</div>')
+    const folder=(coa&&x.fd?'<div style="display:flex;gap:8px;align-items:center;justify-content:center"><a href="#" data-v="'+x.id+'">Lihat</a><button type="button" class="d" data-rf="'+x.id+'" title="Hapus file">hapus file</button></div>':'')
       +(x.fd&&!coa?'<div class="fnm" style="text-align:center"><a href="#" data-v="'+x.id+'">'+esc(x.fn||'File')+'</a> <button type="button" class="d" data-rf="'+x.id+'" title="Hapus file lama">hapus file</button></div>':'');
     return '<tr'+(x.s===0?' class="mu"':'')+'><td><div class="un'+nameAttr(x)+'">'+esc(SHORT[x.n]||x.n)+'</div></td>'
       +'<td><div class="dots"><button type="button" data-cl="'+x.id+':r" class="r'+(x.c==='r'?' on':'')+'" title="Merah"></button><button type="button" data-cl="'+x.id+':g" class="g'+(x.c==='g'?' on':'')+'" title="Hijau"></button></div></td>'
       +'<td>'+folder+'</td><td>'+esc(nm)+'</td><td>'+esc(x.ea||'')+'</td><td class="c">'+dt(tt)+'</td><td class="c">'+dt(tb)+'</td>'
       +'<td><div style="display:flex;gap:4px;align-items:center"><select data-s="'+x.id+'" class="s'+x.s+'">'+ST.map((t,k)=>'<option value="'+k+'"'+(k===x.s?' selected':'')+'>'+t+'</option>').join('')+'</select><button type="button" data-x="'+x.id+'" title="Hapus dokumen" style="border:0;background:none;color:var(--mu);padding:2px 6px">\u2715</button></div></td></tr>'};
-  B.innerHTML='<div class="card"><div class="tw"><table class="d2t"><thead><tr><th>Uraian</th><th>Jenis</th><th>Folder</th><th>Nama</th><th>Alamat</th><th>Tanggal Terbit</th><th>Tanggal Berakhir</th><th>Status</th></tr></thead><tbody>'+d.map(row).join('')+'</tbody></table></div>'
+  B.innerHTML='<div class="card"><div class="row" style="margin:0 0 8px;align-items:center"><b style="white-space:nowrap">Folder Drive</b><input type="text" id="bfl" placeholder="Tempel link folder Drive barang" value="'+esc(it.fl||'')+'" style="flex:1;min-width:0">'+(it.fl?'<a href="'+esc(/^https?:\/\//i.test(it.fl)?it.fl:'https://'+it.fl)+'" target="_blank" rel="noopener" style="white-space:nowrap;font-size:12px;font-weight:600">Buka</a>':'')+'</div><div class="tw"><table class="d2t"><thead><tr><th>Uraian</th><th>Jenis</th><th>File</th><th>Nama</th><th>Alamat</th><th>Tanggal Terbit</th><th>Tanggal Berakhir</th><th>Status</th></tr></thead><tbody>'+d.map(row).join('')+'</tbody></table></div>'
   +'<div class="row"><input id="nd" placeholder="Nama dokumen\u2026" style="max-width:260px"><button id="ad" type="button">Tambah</button></div></div>'
   +gone(it);
   const rw=L.querySelector('[data-b="'+it.id+'"]');if(rw){rw.after(B);B.style.display='';B.style.margin='6px 0 12px'}
@@ -821,15 +896,16 @@ function d2b(u){const q=u.split(','),m=q[0].match(/:(.*?);/)[1],t=atob(q[1]),a=n
 $('dbody').onchange=e=>{
   const t=e.target,it=items.find(i=>i.id===selId);if(!it)return;
   const g=id=>it.docs.find(z=>z.id===id);
-  if(t.dataset.s){const x=g(t.dataset.s);if(x){x.s=+t.value;save();render2()}}
+  if(t.dataset.s){const x=g(t.dataset.s);if(x){x.s=+t.value;delete x.ac;delete x.ps;save();render2()}}
   else if(t.dataset.tt){const x=g(t.dataset.tt);if(x){x.tt=t.value;save()}}
   else if(t.dataset.tb){const x=g(t.dataset.tb);if(x){x.tb=t.value;save()}}
+  else if(t.id==='bfl'){it.fl=t.value.trim();save();render2()}
   else if(t.dataset.lk){
     const x=g(t.dataset.lk);if(!x)return;
     let v=t.value.trim();if(v&&!/^https?:\/\//i.test(v)){const old=x.lk||'';v=(/^http:\/\//i.test(old)&&old.replace(/^http:\/\//i,'')===v?'http://':'https://')+v}
     x.lk=v;if(v&&x.s===0&&!EDN.includes(x.n)&&x.n!=='COA')x.s=2;autoDone(x);
     if(x.n==='Komposisi'&&v)it.docs.forEach(z=>{if(z.lk)return;if((z.n===RML||z.n===RL)&&z.s===2)z.lk=v;else if(KOMPS.includes(z.n)&&z.c){z.lk=v;if(z.s===0)z.s=2}});
-    if(!v&&x.s===2&&x.n!=='COA')x.s=(EDN.includes(x.n)&&(x.en||x.ea||x.tt))?1:0;
+    if(!v&&x.s===2&&x.n!=='COA'&&!(x.c&&x.n!==RML&&x.n!==RL))x.s=(EDN.includes(x.n)&&(x.en||x.ea||x.tt))?1:0;
     save();render2();
   }
 };
@@ -837,7 +913,7 @@ $('dbody').onclick=e=>{
   const t=e.target;
   if(t.id==='back'){selId=null;render2();return}
   const cl=t.closest('[data-cl]');
-  if(cl){const q=cl.dataset.cl.split(':'),it0=items.find(i=>i.id===selId),x0=it0&&it0.docs.find(z=>z.id===q[0]);if(x0){if(x0.c===q[1])delete x0.c;else x0.c=q[1];if(x0.c&&KOMPS.includes(x0.n)&&!x0.lk){const l=kompLk(it0);if(l){x0.lk=l;if(x0.s===0)x0.s=2}}save();render2()}return}
+  if(cl){const q=cl.dataset.cl.split(':'),it0=items.find(i=>i.id===selId),x0=it0&&it0.docs.find(z=>z.id===q[0]);if(x0){if(x0.c===q[1])delete x0.c;else x0.c=q[1];const exm=x0.n==='COA'||x0.n===RML||x0.n===RL;if(x0.c){const okk=!EDN.includes(x0.n)||!!(x0.en&&x0.ea&&(x0.n!==CFSN||x0.tt));if(!exm&&okk&&x0.s!==2){x0.ps=x0.s;x0.s=2;x0.ac=1}}else if(x0.ac){x0.s=x0.ps||0;delete x0.ac;delete x0.ps}if(x0.c&&KOMPS.includes(x0.n)&&!x0.lk){const l=kompLk(it0);if(l){x0.lk=l;if(x0.s===0)x0.s=2}}save();render2()}return}
   const ed=t.closest('[data-ed]');if(ed){openE(ed.dataset.ed);return}
   const coax=t.closest('[data-coa]');if(coax){openCOA(coax.dataset.coa);return}
   const mlx=t.closest('[data-ml]');if(mlx){openML(mlx.dataset.ml);return}
@@ -1571,7 +1647,7 @@ function renderP(){
   rows=rows.filter(r=>r.a===MS[pMode]);
   const siap=rows.filter(r=>r.ok).length;
   $('pcnt').textContent=siap+' siap \u00b7 '+(rows.length-siap)+' belum';
-  rows=rows.filter(r=>!f||(f==='Siap')===r.ok);
+  rows=rows.filter(r=>!f||(f==='Lengkap')===r.ok);
   $('tbp').innerHTML=rows.length?rows.map(r=>{
     const N=(r.ok?esc(r.fc.n||'-'):(markWords(r.fc.n,r.lm.n)||'-')),A=r.ok?esc(r.fc.a):markWords(r.fc.a,r.lm.a);
     const dN=r.fn?' <span title="Nama/alamat sama dengan pabrik di '+esc(r.fn)+'" style="cursor:help">\ud83d\udd34</span>':'';
@@ -1579,7 +1655,7 @@ function renderP(){
     const cw=(h,t)=>'<div style="display:flex;align-items:flex-start;gap:6px"><div>'+h+'</div><button class="cpb" data-cp="'+esc(t)+'" style="flex:none;padding:1px 7px;font-size:11px">Salin</button></div>';
     const nameH=pMode==='a'&&r.fc.n?cw('<b>'+N+'</b>'+dN,r.fc.n):'<b>'+N+'</b>'+dN;
     const addrH=r.fc.a?'<div class="fnm">'+(pMode==='a'?cw(A+dA,r.fc.a):A+dA)+'</div>':'';
-    return '<tr><td>'+nameH+addrH+'</td><td>'+r.N+'</td>'+r.e.map(a=>'<td>'+ecell(a,r.ok?null:r.fc)+'</td>').join('')+'<td><span class="b '+(r.ok?'ok':'wip')+'">'+(r.ok?'Siap':'Belum')+'</span></td><td>'+(pMode==='d'?(r.ok?'<button class="p" data-pg="'+esc(r.k)+'" data-ps="Diajukan">Proses</button>':'<button disabled title="Status Belum: lengkapi LOA/LOE, CFS, dan NKV/HACCP/ISO di Kelengkapan Dokumen dulu" style="opacity:.45;cursor:not-allowed">Proses</button>'):pMode==='p'?'<button class="p" data-pg="'+esc(r.k)+'" data-ps="Disetujui">Selesai</button> '+'<button data-pb="'+esc(r.k)+'" data-ps="">Kembalikan</button>':'<button data-pb="'+esc(r.k)+'" data-ps="Diajukan">Kembalikan</button>')+'</td></tr>';
+    return '<tr><td>'+nameH+addrH+'</td><td>'+r.N+'</td>'+r.e.map(a=>'<td>'+ecell(a,r.ok?null:r.fc)+'</td>').join('')+'<td><span class="b '+(r.ok?'ok':'wip')+'">'+(r.ok?'Lengkap':'Belum Lengkap')+'</span></td><td>'+(pMode==='d'?(r.ok?'<button class="p" data-pg="'+esc(r.k)+'" data-ps="Diajukan">Proses</button>':'<button disabled title="Belum Lengkap: lengkapi LOA/LOE, CFS, dan NKV/HACCP/ISO di Kelengkapan Dokumen dulu" style="opacity:.45;cursor:not-allowed">Proses</button>'):pMode==='p'?'<button class="p" data-pg="'+esc(r.k)+'" data-ps="Disetujui">Selesai</button> '+'<button data-pb="'+esc(r.k)+'" data-ps="">Kembalikan</button>':'<button data-pb="'+esc(r.k)+'" data-ps="Diajukan">Kembalikan</button>')+'</td></tr>';
   }).join(''):'<tr><td colspan="8" class="empty">Belum ada data.</td></tr>';
 }
 $('pflt').onchange=renderP;
@@ -1591,7 +1667,7 @@ function copyTxt(t,b){
 }
 $('tbp').onclick=e=>{const d=e.target.dataset;
   if(d.cp!==undefined){copyTxt(d.cp,e.target);return}
-  if(d.pb!==undefined){const to=d.ps==='Diajukan'?'Proses':'Daftar';if(!confirm('Kembalikan pabrik ini ke '+to+'?'+(d.ps==='Diajukan'?' Barangnya tidak lagi memenuhi syarat di SPB BPOM sampai disetujui lagi.':'')))return;items.forEach(i=>{if(pkey(i)===d.pb)i.pp=d.ps});save();renderP();return}
+  if(d.pb!==undefined){const to=d.ps==='Diajukan'?'Proses':'Daftar Pabrik';if(!confirm('Kembalikan pabrik ini ke '+to+'?'+(d.ps==='Diajukan'?' Barangnya tidak lagi memenuhi syarat di SPB BPOM sampai disetujui lagi.':'')))return;items.forEach(i=>{if(pkey(i)===d.pb)i.pp=d.ps});save();renderP();return}
   if(d.pg!==undefined){if(d.ps==='Diajukan'&&!items.some(i=>pkey(i)===d.pg&&(sameEnt(i,PA)||sameEnt(i,PB)))){alert('Status masih Belum, belum bisa diproses.');return}items.forEach(i=>{if(pkey(i)===d.pg)i.pp=d.ps});save();renderP()}};
 let eId=null,eAuto='';
 function eKeys(){const p=$('e_t').value==='Principal';return p?['prin','aprin']:['pab','apab']}
@@ -1657,7 +1733,7 @@ function plus1y(v){const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!
 function autoDone(x){
   if(!EDN.includes(x.n))return;
   const ok=!!(x.en&&x.ea&&(x.n!==CFSN||x.tt));
-  if(ok&&x.lk&&x.s<2)x.s=2;
+  if(ok&&(x.lk||x.c)&&x.s<2){if(!x.lk){x.ps=x.s;x.ac=1}x.s=2}
 }
 let eAutoTb='';
 function eCfsTb(){
