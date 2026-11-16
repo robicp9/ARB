@@ -255,7 +255,7 @@ input[type=color]{width:34px;height:26px;padding:0;border:0;background:none;curs
   </div>
 
   <div id="v5" style="display:none">
-    <div class="card"><div class="row" style="margin-top:0"><b>Daftar Barang</b><span class="cnt" id="c5"></span><button class="p" id="nie_bulk" style="margin-left:auto" title="Pilih banyak file NIE sekaligus. Nama file harus memuat nomor pengajuan">Unggah banyak NIE</button><input type="file" id="nie_multi" multiple accept="application/pdf,image/*" hidden><button id="nie_old" title="Unggah banyak NIE RBA (yang terbit sebelum aplikasi ini dipakai). Barang dibuat otomatis dari isi file dan tetap di tab 5 sampai Anda klik Simpan">Unggah NIE RBA</button><input type="file" id="nie_oldf" multiple accept="application/pdf,image/*" hidden><button id="nie_ereg" title="Unggah banyak NIE EREG (izin edar model lama dari e-Reg, ada kop Badan POM). Barang dibuat otomatis dari isi file dan tetap di tab 5 sampai Anda klik Simpan">Unggah NIE EREG</button><input type="file" id="nie_eregf" multiple accept="application/pdf,image/*" hidden></div><div class="cnt" id="nie_bm" style="margin-top:6px"></div><div class="cnt" style="margin-top:6px">Barang yang sudah diajukan dari tab SPB BPOM.</div><div id="l5" style="margin-top:8px"></div></div>
+    <div class="card"><div class="row" style="margin-top:0"><b>Daftar Barang</b><span class="cnt" id="c5"></span><button class="p" id="nie_bulk" style="margin-left:auto" title="Pilih banyak file NIE sekaligus. Nama file harus memuat nomor pengajuan">Unggah banyak NIE</button><input type="file" id="nie_multi" multiple accept="application/pdf,image/*" hidden><button id="nie_old" title="Unggah banyak NIE RBA (yang terbit sebelum aplikasi ini dipakai). Barang dibuat otomatis dari isi file dan tetap di tab 5 sampai Anda klik Simpan">Unggah NIE RBA</button><input type="file" id="nie_oldf" multiple accept="application/pdf,image/*" hidden><button id="nie_ereg" title="Unggah banyak NIE EREG (izin edar model lama dari e-Reg, ada kop Badan POM). Barang dibuat otomatis dari isi file dan tetap di tab 5 sampai Anda klik Simpan">Unggah NIE EREG</button><input type="file" id="nie_eregf" multiple accept="application/pdf,image/*" hidden></div><div class="cnt" id="nie_bm" style="margin-top:6px"></div><div class="row" style="margin:8px 0 0"><input id="cari5" placeholder="Cari barang, principal, pabrik, nomor pengajuan, billing ID, atau nomor NIE…" style="max-width:420px"></div><div class="cnt" style="margin-top:6px">Barang yang sudah diajukan dari tab SPB BPOM.</div><div id="l5" style="margin-top:8px"></div></div>
   </div>
 
   <div id="v6" style="display:none">
@@ -1243,6 +1243,7 @@ function revQr(){
   const lb=(it.reg&&it.reg.d&&it.reg.d.lab)||(it.nie&&it.nie.lab)||{};
   return lb.qr||null;
 }
+$('cari5').oninput=render4;
 $('l5').onclick=e=>{
   const d=e.target.dataset;
   if(d.vs){e.preventDefault();const it=items.find(i=>i.id===d.vs);if(it&&it.spb&&it.spb.fd)openDU(it.spb.fd,it.spb.fn);return}
@@ -1380,8 +1381,9 @@ function labFields(i,x){
    +'<div class="cnt" style="margin:0;flex:1 1 230px">'+fcap('kp','Komposisi')+rtEd(lb.kp,'data-lfr="kp:'+i.id+'"',1,1)+'</div>'+f('dp','Diproduksi Oleh',1)+f('di','Diimpor Oleh',1)+'</div>';
 }
 function render4(){
-  const l=items.filter(i=>i.reg&&!i.nie);
-  $('c5').textContent=l.length+' barang';
+  const all5=items.filter(i=>i.reg&&!i.nie),q5=(($('cari5')||{}).value||'').trim().toLowerCase();
+  const l=q5?all5.filter(i=>{const sp=i.spb||{},rd=(i.reg&&i.reg.d)||{};return [i.nama,i.jenis,i.njenis,i.abv,i.kemasan,i.prin,i.pab,i.apab,i.pic,sp.ng,sp.bid,sp.no,rd.no,rd.fn].join(' ').toLowerCase().includes(q5)}):all5;
+  $('c5').textContent=q5?l.length+' dari '+all5.length+' barang':l.length+' barang';
   $('l5').innerHTML=l.length?'<div class="tw"><table><thead><tr><th>Nomor Pengajuan</th><th>Billing ID</th><th>Produk</th><th>Produsen</th><th>SPB</th><th>Action</th></tr></thead><tbody>'+l.map(i=>{
     const x=(i.reg&&i.reg.d)||{};
     const sub0='<tr class="dt"><td colspan="6"><div class="row" style="margin:0;gap:8px;align-items:flex-end;flex-wrap:wrap"><label class="cnt" style="margin:0">Nomor NIE <input data-nn="'+i.id+'" value="'+esc(x.no||'')+'" placeholder="mis. ML 536021012345" style="width:160px;min-width:0;padding:4px 6px;font-size:12px"></label><label class="cnt" style="margin:0">Masa berlaku <input type="date" data-nx="'+i.id+'" value="'+esc(x.exp||'')+'" style="width:130px;padding:4px 6px;font-size:12px"></label>'+'<span style="display:flex;gap:8px;align-items:center;padding-bottom:3px"><label class="fl" style="margin:0;display:inline">'+(x.fd?'Ganti NIE':'Unggah NIE')+'<input type="file" accept="application/pdf,image/*" data-nf="'+i.id+'" hidden></label>'+(x.fd?'<a href="#" class="fl" style="margin:0" data-nv="'+i.id+'" title="'+esc(x.fn||'NIE')+'">Lihat NIE</a><button class="d" data-nd="'+i.id+'">hapus</button>':'')+'<button class="p" data-ns="'+i.id+'">Simpan</button></span>'+(nMsg[i.id]?'<span class="cnt" style="padding-bottom:4px">'+esc(nMsg[i.id])+'</span>':'')+'</div>'+labFields(i,x)+'</td></tr>';
@@ -1391,7 +1393,7 @@ function render4(){
     const spbIn=i.spb&&i.spb.fd?'<a href="#" data-vs="'+i.id+'" title="'+esc(i.spb.fn||'SPB.pdf')+'">Lihat</a>':'';
     const op=actOpen===i.id,sm='style="font-size:12px;padding:3px 8px"';
     const act='<div data-actwrap><button class="d" data-am="'+i.id+'" title="Menu" style="font-size:18px;line-height:1;padding:2px 10px">\u2630</button>'+(op?'<div class="amenu" style="display:flex;flex-direction:column;gap:6px;align-items:flex-start;margin-top:6px"><button class="d" '+sm+' '+(i.lg?'data-x5':'data-b5')+'="'+i.id+'">'+(i.lg?'Hapus barang':'\u21a9 Kembalikan ke SPB BPOM')+'</button></div>':'')+'</div>';
-    return bRow(i,{rev:rev,spbIn:spbIn,sub:sub,act:act,noPrin:true,kemIn:true,dateIn:true,t6:true})}).join('')+'</tbody></table></div>':'<div class="empty">Belum ada barang di PENDAFTARAN.</div>';
+    return bRow(i,{rev:rev,spbIn:spbIn,sub:sub,act:act,noPrin:true,kemIn:true,dateIn:true,t6:true})}).join('')+'</tbody></table></div>':'<div class="empty">'+(q5?'Tidak ada barang yang cocok dengan pencarian.':'Belum ada barang di PENDAFTARAN.')+'</div>';
 }
 function golOf(a){a=parseFloat(String(a==null?'':a).replace(',','.'));if(!isFinite(a)||a<0)return '';return a<=5?'A':a<=20?'B':a<=55?'C':''}
 function ab6(i){const g=(i.nie&&i.nie.lab)||{},h=(i.reg&&i.reg.d&&i.reg.d.lab)||{};const v=[i.abv,g.al,h.al].find(x=>x!==undefined&&x!==null&&String(x).trim()!=='');return v}
@@ -1491,7 +1493,7 @@ async function dlML6(){
     for(const it of l){
       const n=it.nie;if(!n.fd)continue;const b=await getBlob(n.fd);
       const ex=b.type==='application/pdf'?'.pdf':/png/.test(b.type)?'.png':/webp/.test(b.type)?'.webp':'.jpg';
-      let nm=String(n.fn||('NIE '+n.no+ex)).replace(/[\\\/:*?"<>|]+/g,'_');
+      let nm=[itTitle6(it),n.no,n.exp?fmtD(n.exp):''].filter(Boolean).join(' ').replace(/[\\\/:*?"<>|]+/g,'_').replace(/\s+/g,' ').trim().slice(0,150)+ex;
       if(used[nm]){const d=nm.lastIndexOf('.'),k=++used[nm];nm=d>0?nm.slice(0,d)+' ('+k+')'+nm.slice(d):nm+' ('+k+')'}else used[nm]=1;
       fl.push([nm,b]);
     }
@@ -2373,6 +2375,7 @@ function compHTML(lb,m,ed){
 const LBK=[['sil','Siluet Botol'],['dep','Label Depan'],['bel','Label Belakang (opsional)']];
 function lbRender(){
   const it=curIt(),x=it&&it.docs.find(z=>z.id===lbId);if(!x)return;
+  if(x.lb&&any(x.lb,isRef)){const xid=x.id;hydrate(x.lb).then(()=>{if(lbId===xid)lbRender()}).catch(()=>{});return}
   const lb=x.lb||{},md=mlDoc(it),mok=!!(md&&mlComplete(md.ml));
   if(lb.sil&&!lb.ar&&typeof Image!=='undefined'){const im=new Image();im.onload=()=>{lb.ar=im.width/im.height;save();if(lbId===x.id)lbRender()};im.onerror=()=>{lb.ar=0.62;save()};im.src=lb.sil}
   const ex=lb.ex||[];
@@ -2447,6 +2450,7 @@ const H2C='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.
 async function lbDownload(){
   const it=curIt(),x=it&&it.docs.find(z=>z.id===lbId);if(!x)return;
   const lb=x.lb||{},md=mlDoc(it);
+  if(any(lb,isRef)){try{await hydrate(lb)}catch(e){alert('Gambar belum bisa dimuat. Periksa koneksi internet.');return}}
   if(!(lb.sil&&lb.dep&&md&&mlComplete(md.ml))){alert('Preview belum lengkap. Lengkapi dulu siluet, label depan, dan Rancangan ML BPOM.');return}
   const btn=$('lb_dl'),old=btn.textContent;btn.disabled=true;btn.textContent='Membuat gambar\u2026';
   let host=null;
